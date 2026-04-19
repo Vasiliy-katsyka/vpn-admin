@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compact VPN - Admin Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { primary: '#6366f1', secondary: '#ec4899', dark: '#0f172a', darkSurface: '#1e293b' } } }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        
+        .nav-item.active { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white !important; box-shadow: 0 4px 15px -3px rgba(99, 102, 241, 0.4); }
+        .nav-item.active i { color: white !important; }
+        
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 0.5rem; color: transparent !important; pointer-events: none;}
+        .dark .skeleton { background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%); background-size: 200% 100%; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Login Screen Backdrop Blur */
+        .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); }
+        .dark .glass-panel { background: rgba(30, 41, 59, 0.85); border: 1px solid rgba(255,255,255,0.05); }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-dark text-slate-800 dark:text-slate-200 h-screen overflow-hidden transition-colors duration-300 font-sans">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="fixed inset-0 z-[100] bg-gradient-to-br from-indigo-100 to-pink-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center transition-opacity duration-500">
+        <div class="glass-panel p-8 rounded-3xl shadow-2xl w-96 max-w-[90%] transform scale-100 transition-transform">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg text-white text-2xl">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 dark:text-white">Admin Access</h2>
+                <p class="text-sm text-slate-500 mt-1">Please enter your credentials</p>
+            </div>
+            <form onsubmit="performLogin(event)" class="space-y-4">
+                <div>
+                    <div class="relative">
+                        <i class="fa-solid fa-user absolute left-4 top-3.5 text-slate-400"></i>
+                        <input id="login-user" type="text" required placeholder="@username" class="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary outline-none transition dark:text-white">
+                    </div>
+                </div>
+                <div>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-4 top-3.5 text-slate-400"></i>
+                        <input id="login-pass" type="password" required placeholder="Password" class="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary outline-none transition dark:text-white">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-primary to-indigo-600 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-indigo-500/30 transition-all transform hover:-translate-y-0.5 mt-2">
+                    Log In
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div id="app-container" class="flex h-full w-full hidden opacity-0 transition-opacity duration-500">
+        
+        <!-- Mobile Sidebar Backdrop -->
+        <div id="sidebar-backdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden transition-opacity"></div>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed md:static inset-y-0 left-0 w-64 bg-white dark:bg-darkSurface shadow-2xl md:shadow-xl flex flex-col justify-between z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 border-r border-slate-100 dark:border-slate-800">
+            <div class="overflow-y-auto">
+                <div class="h-20 flex items-center justify-between px-6 border-b border-slate-100 dark:border-slate-800">
+                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary flex items-center">
+                        <i class="fa-solid fa-shield-halved mr-2 text-primary"></i>Compact VPN
+                    </h1>
+                    <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <nav class="p-4 space-y-1 mt-2 text-sm">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
+                        <i class="fa-solid fa-chart-pie w-5 text-center text-slate-400"></i><span>Dashboard</span>
+                    </button>
+                    <button onclick="switchTab('users')" id="nav-users" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
+                        <i class="fa-solid fa-users w-5 text-center text-slate-400"></i><span>Users</span>
+                    </button>
+                    <button onclick="switchTab('servers')" id="nav-servers" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
+                        <i class="fa-solid fa-server w-5 text-center text-slate-400"></i><span>Server Health</span>
+                    </button>
+                    <button onclick="switchTab('promos')" id="nav-promos" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
+                        <i class="fa-solid fa-ticket w-5 text-center text-slate-400"></i><span>Promocodes</span>
+                    </button>
+                    <button onclick="switchTab('broadcast')" id="nav-broadcast" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
+                        <i class="fa-solid fa-bullhorn w-5 text-center text-slate-400"></i><span>Broadcast</span>
+                    </button>
+                    <button onclick="switchTab('generate')" id="nav-generate" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
+                        <i class="fa-solid fa-gift w-5 text-center text-slate-400"></i><span>Issue Sub</span>
+                    </button>
+                    <button onclick="switchTab('logs')" id="nav-logs" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
+                        <i class="fa-solid fa-list-check w-5 text-center text-slate-400"></i><span>Audit Logs</span>
+                    </button>
+                </nav>
+            </div>
+            <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
+                <div class="flex items-center justify-between px-2 py-1">
+                    <div class="flex items-center space-x-3">
+                        <img src="https://ui-avatars.com/api/?name=A&background=6366f1&color=fff" class="w-10 h-10 rounded-full shadow-md border-2 border-white dark:border-slate-700">
+                        <div>
+                            <p id="admin-name" class="text-sm font-bold text-slate-800 dark:text-slate-200">@admin</p>
+                            <p class="text-xs text-green-500 font-medium flex items-center"><span class="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span>Online</p>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="text-slate-400 hover:text-red-500 transition"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Body -->
+        <main class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50 dark:bg-dark relative">
+            <!-- Mobile Header & Topbar -->
+            <header class="h-16 md:h-20 flex items-center justify-between px-4 md:px-8 bg-white/80 dark:bg-darkSurface/80 backdrop-blur-md shadow-sm z-10 border-b border-slate-100 dark:border-slate-800">
+                <div class="flex items-center">
+                    <button onclick="toggleSidebar()" class="md:hidden mr-4 text-slate-600 dark:text-slate-300 text-xl p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"><i class="fa-solid fa-bars"></i></button>
+                    <h2 id="page-title" class="text-xl md:text-2xl font-bold text-slate-800 dark:text-white truncate">Dashboard Overview</h2>
+                </div>
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <button onclick="downloadBackup()" class="hidden md:flex px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-medium transition shadow-lg items-center">
+                        <i class="fa-solid fa-database mr-2"></i> DB Backup
+                    </button>
+                    <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 transition flex items-center justify-center">
+                        <i id="theme-icon" class="fa-solid fa-moon"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-8" id="content-area">
+                
+                <!-- DASHBOARD -->
+                <div id="tab-dashboard" class="fade-in space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                        <div class="bg-white dark:bg-darkSurface p-5 md:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-slate-500 font-medium mb-1">Total Users</p>
+                                <h3 class="text-3xl font-bold dark:text-white skeleton" id="stat-total-users">000</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/50 text-indigo-500 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-users"></i></div>
+                        </div>
+                        <div class="bg-white dark:bg-darkSurface p-5 md:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-slate-500 font-medium mb-1">Active Subs</p>
+                                <h3 class="text-3xl font-bold dark:text-white skeleton" id="stat-active-subs">000</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/50 text-emerald-500 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-check-circle"></i></div>
+                        </div>
+                        <div class="bg-white dark:bg-darkSurface p-5 md:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-slate-500 font-medium mb-1">Est. Revenue</p>
+                                <h3 class="text-3xl font-bold dark:text-white skeleton" id="stat-revenue">000</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-amber-50 dark:bg-amber-900/50 text-amber-500 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-ruble-sign"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                        <div class="bg-white dark:bg-darkSurface p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                            <h3 class="font-bold text-lg mb-4 dark:text-white">Revenue (Last 14 Days)</h3>
+                            <!-- FIX FOR CHARTS: relative container with fixed height -->
+                            <div class="relative h-64 w-full">
+                                <canvas id="salesChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-darkSurface p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                            <h3 class="font-bold text-lg mb-4 dark:text-white">Top 10 Data Consumers (GB)</h3>
+                            <div class="relative h-64 w-full">
+                                <canvas id="trafficChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- USERS -->
+                <div id="tab-users" class="hidden fade-in space-y-6">
+                    <div class="bg-white dark:bg-darkSurface rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+                        <div class="p-4 md:p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/30">
+                            <div class="relative w-full md:w-72">
+                                <i class="fa-solid fa-search absolute left-4 top-3.5 text-slate-400"></i>
+                                <input type="text" id="search-user" onkeyup="filterUsers()" placeholder="Search ID or Username..." class="w-full pl-11 pr-4 py-3 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-primary text-sm dark:text-white">
+                            </div>
+                            <button onclick="fetchUsers()" class="w-full md:w-auto px-5 py-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-100 transition font-medium flex items-center justify-center"><i class="fa-solid fa-rotate-right mr-2"></i> Refresh</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left whitespace-nowrap">
+                                <thead>
+                                    <tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-xs uppercase tracking-wider border-b dark:border-slate-700">
+                                        <th class="px-6 py-4 font-semibold">User Info</th>
+                                        <th class="px-6 py-4 font-semibold">Status / Expiry</th>
+                                        <th class="px-6 py-4 font-semibold text-center">Devices</th>
+                                        <th class="px-6 py-4 font-semibold text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body" class="divide-y divide-slate-100 dark:divide-slate-800/50 text-sm">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SERVERS -->
+                <div id="tab-servers" class="hidden fade-in space-y-6">
+                    <div class="flex justify-between items-center bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
+                        <p class="text-sm text-indigo-800 dark:text-indigo-300 flex items-center"><i class="fa-solid fa-circle-info mr-2 text-indigo-500"></i>Live monitoring of X-UI instances.</p>
+                        <button onclick="fetchServers()" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm font-medium"><i class="fa-solid fa-sync mr-1"></i> Sync</button>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6" id="server-grid"></div>
+                </div>
+
+                <!-- PROMO CODES -->
+                <div id="tab-promos" class="hidden fade-in space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="col-span-1 bg-white dark:bg-darkSurface p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                            <h3 class="text-lg font-bold dark:text-white mb-4">Create Code</h3>
+                            <form onsubmit="createPromo(event)" class="space-y-4">
+                                <div><label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Code Word</label><input id="promo-code" required class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white" placeholder="SUMMER24"></div>
+                                <div><label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Reward Value (Days)</label><input id="promo-val" type="number" required class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white" value="7"></div>
+                                <div><label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Max Uses</label><input id="promo-max" type="number" required class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white" value="100"></div>
+                                <button class="w-full bg-primary hover:bg-indigo-600 text-white py-3 rounded-xl font-bold transition shadow-lg hover:-translate-y-0.5">Create Code</button>
+                            </form>
+                        </div>
+                        <div class="col-span-1 lg:col-span-2 bg-white dark:bg-darkSurface p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-x-auto">
+                            <h3 class="text-lg font-bold dark:text-white mb-4">Active Promocodes</h3>
+                            <table class="w-full text-left text-sm whitespace-nowrap"><tbody id="promo-table" class="divide-y divide-slate-100 dark:divide-slate-800/50"></tbody></table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BROADCAST -->
+                <div id="tab-broadcast" class="hidden fade-in space-y-6 flex justify-center">
+                    <div class="bg-white dark:bg-darkSurface p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 w-full max-w-2xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10"></div>
+                        <h3 class="text-xl font-bold dark:text-white mb-6 flex items-center"><i class="fa-solid fa-bullseye text-primary mr-2"></i> Surgical Messaging</h3>
+                        <form onsubmit="sendBroadcast(event)" class="space-y-5">
+                            <div>
+                                <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Select Target Audience</label>
+                                <select id="bc-target" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-primary dark:text-white outline-none">
+                                    <option value="all">All Users in Database</option>
+                                    <option value="active">Active Subscriptions Only</option>
+                                    <option value="expired">Expired Subscriptions (Win-back)</option>
+                                    <option value="trial">Trial Users Only</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Message Content (HTML Allowed)</label>
+                                <textarea id="bc-text" rows="5" required placeholder="Hello! We just added a new server..." class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-primary dark:text-white outline-none"></textarea>
+                            </div>
+                            <button type="submit" id="btn-broadcast" class="w-full bg-gradient-to-r from-primary to-indigo-600 hover:from-indigo-600 hover:to-primary text-white py-4 rounded-xl font-bold transition shadow-lg hover:-translate-y-0.5 flex justify-center items-center text-lg">
+                                <i class="fa-solid fa-paper-plane mr-2"></i> Launch Broadcast
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- AUDIT LOGS -->
+                <div id="tab-logs" class="hidden fade-in space-y-6">
+                    <div class="bg-white dark:bg-darkSurface p-4 md:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <thead><tr class="text-slate-500 uppercase text-xs border-b dark:border-slate-700"><th class="px-4 py-3">Time</th><th class="px-4 py-3">Admin</th><th class="px-4 py-3">Action Details</th></tr></thead>
+                            <tbody id="logs-table" class="divide-y divide-slate-100 dark:divide-slate-800/50"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- GENERATE SUB -->
+                <div id="tab-generate" class="hidden fade-in space-y-6 flex justify-center">
+                    <div class="bg-white dark:bg-darkSurface p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 w-full max-w-2xl relative overflow-hidden">
+                        <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-pink-500/10 rounded-full blur-3xl -z-10"></div>
+                        <h3 class="text-2xl font-bold dark:text-white mb-2">Issue Subscription</h3>
+                        <p class="text-sm text-slate-500 mb-6">Generate a VPN link and send it directly via Bot DM.</p>
+                        <form onsubmit="generateSubscription(event)" class="space-y-5">
+                            <div><label class="block text-sm font-medium mb-1 text-slate-600 dark:text-slate-400">Telegram ID / @username</label><input type="text" id="gen-user-id" required placeholder="e.g. 5146625949" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-primary dark:text-white outline-none"></div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium mb-1 text-slate-600 dark:text-slate-400">Devices</label><select id="gen-devices" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl dark:text-white outline-none"><option value="1">1 Device</option><option value="3">3 Devices</option><option value="0">Unlimited</option></select></div>
+                                <div><label class="block text-sm font-medium mb-1 text-slate-600 dark:text-slate-400">Months</label><select id="gen-months" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl dark:text-white outline-none"><option value="1">1 Month</option><option value="12">12 Months</option></select></div>
+                            </div>
+                            <button type="submit" id="btn-generate" class="w-full bg-slate-800 dark:bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg hover:-translate-y-0.5 transition flex justify-center items-center text-lg mt-2"><i class="fa-solid fa-magic mr-2 text-pink-400"></i> Issue & Send</button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals & Toasts -->
+    <div id="add-days-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-[60] transition-opacity p-4">
+        <div class="bg-white dark:bg-darkSurface p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-200 dark:border-slate-700 transform transition-transform">
+            <h3 class="text-xl font-bold dark:text-white mb-2">Add Bonus Days</h3>
+            <p class="text-sm text-slate-500 mb-6">Top up balance for user: <span id="modal-uid" class="font-bold text-primary bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded"></span></p>
+            <input type="number" id="days-to-add" value="30" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl mb-6 dark:text-white font-medium text-lg outline-none focus:ring-2 focus:ring-primary">
+            <div class="flex space-x-3">
+                <button onclick="closeModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 py-3 rounded-xl font-bold transition">Cancel</button>
+                <button onclick="confirmAddDays()" class="flex-1 bg-primary hover:bg-indigo-600 text-white py-3 rounded-xl font-bold transition shadow-lg">Confirm</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast-container" class="fixed bottom-5 right-5 space-y-3 z-[100] flex flex-col items-end"></div>
+
+    <script>
+        const API_BASE = "https://api.compactvpn.fun:8443"; // Ensure this matches your Flask port URL
+        const ADMIN_TOKEN = "CompactAdmin2026"; 
+
+        let usersList =[];
+        let selectedUserIdForDays = null;
+        let salesChartObj = null;
+        let trafficChartObj = null;
+
+        // AUTHENTICATION LOGIC
+        function checkAuth() {
+            const user = sessionStorage.getItem('admin_user');
+            if(user) {
+                document.getElementById('login-screen').classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => document.getElementById('login-screen').classList.add('hidden'), 500);
+                
+                document.getElementById('app-container').classList.remove('hidden');
+                setTimeout(() => document.getElementById('app-container').classList.remove('opacity-0'), 50);
+                
+                document.getElementById('admin-name').innerText = '@' + user;
+                
+                // Initialize Data
+                fetchStats(); fetchCharts(); fetchUsers();
+            } else {
+                document.getElementById('app-container').classList.add('hidden');
+                document.getElementById('login-screen').classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+            }
+        }
+
+        function performLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('login-user').value.trim().replace('@', '').toLowerCase();
+            const p = document.getElementById('login-pass').value;
+            
+            if((u === 'katsyka' || u === 'grachev5') && p === 'compact2026') {
+                sessionStorage.setItem('admin_user', u);
+                showToast(`Welcome back, ${u}!`, 'success');
+                checkAuth();
+            } else {
+                showToast('Invalid credentials!', 'error');
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('admin_user');
+            document.getElementById('login-user').value = '';
+            document.getElementById('login-pass').value = '';
+            checkAuth();
+        }
+
+        // MOBILE SIDEBAR TOGGLE
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            sidebar.classList.toggle('-translate-x-full');
+            if(backdrop.classList.contains('hidden')) {
+                backdrop.classList.remove('hidden');
+                setTimeout(()=> backdrop.classList.add('opacity-100'), 10);
+            } else {
+                backdrop.classList.remove('opacity-100');
+                setTimeout(()=> backdrop.classList.add('hidden'), 300);
+            }
+        }
+
+        // THEME LOGIC
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark'); document.getElementById('theme-icon').classList.replace('fa-moon', 'fa-sun');
+        }
+
+        function toggleDarkMode() {
+            const html = document.documentElement; const icon = document.getElementById('theme-icon');
+            if (html.classList.contains('dark')) { html.classList.remove('dark'); localStorage.setItem('theme', 'light'); icon.classList.replace('fa-sun', 'fa-moon'); } 
+            else { html.classList.add('dark'); localStorage.setItem('theme', 'dark'); icon.classList.replace('fa-moon', 'fa-sun'); }
+            
+            // Re-render charts to fix colors if they exist
+            if(salesChartObj) fetchCharts();
+        }
+
+        window.onload = checkAuth;
+
+        function getHeaders() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ADMIN_TOKEN}` }; }
+        function showToast(msg, type='success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `${type==='success'?'bg-emerald-500':'bg-rose-500'} text-white px-6 py-3 rounded-2xl shadow-xl flex items-center space-x-3 fade-in font-medium text-sm`;
+            toast.innerHTML = `<i class="fa-solid fa-${type==='success'?'check':'triangle-exclamation'}"></i><span>${msg}</span>`;
+            container.appendChild(toast); setTimeout(() => toast.remove(), 4000);
+        }
+
+        function switchTab(tabId) {['dashboard', 'users', 'servers', 'promos', 'broadcast', 'logs', 'generate'].forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                if(el) el.classList.add('hidden');
+                const nav = document.getElementById(`nav-${t}`);
+                if(nav) { nav.classList.remove('active'); nav.querySelector('i').classList.remove('text-white'); }
+            });
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const navBtn = document.getElementById(`nav-${tabId}`);
+            navBtn.classList.add('active'); navBtn.querySelector('i').classList.add('text-white');
+            
+            const titles = { dashboard: 'Dashboard Overview', users: 'User Management', servers: 'Server Health', promos: 'Promo Codes', broadcast: 'Broadcast System', logs: 'System Logs', generate: 'Issue Subscription'};
+            document.getElementById('page-title').innerText = titles[tabId] || 'Panel';
+            
+            // Close mobile sidebar on tab switch
+            if(window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) toggleSidebar();
+            
+            if(tabId === 'servers') fetchServers();
+            if(tabId === 'promos') fetchPromos();
+            if(tabId === 'logs') fetchLogs();
+            if(tabId === 'dashboard') fetchCharts();
+        }
+
+        function downloadBackup() { window.open(`${API_BASE}/api/admin/backup?auth=${ADMIN_TOKEN}`, '_blank'); }
+
+        async function fetchStats() {
+            try {
+                let res = await fetch(`${API_BASE}/api/admin/stats`, { headers: getHeaders() });
+                let data = await res.json();
+                ['stat-total-users','stat-active-subs','stat-revenue'].forEach(id => document.getElementById(id).classList.remove('skeleton'));
+                document.getElementById('stat-total-users').innerText = data.totalUsers;
+                document.getElementById('stat-active-subs').innerText = data.activeSubs;
+                document.getElementById('stat-revenue').innerText = "₽ " + data.revenue.toLocaleString();
+            } catch (e) { console.error(e); }
+        }
+
+        async function fetchCharts() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+            const textColor = isDark ? '#94a3b8' : '#64748b';
+
+            try {
+                let res = await fetch(`${API_BASE}/api/admin/charts`, { headers: getHeaders() });
+                let data = await res.json();
+                
+                let ctx = document.getElementById('salesChart').getContext('2d');
+                if(salesChartObj) salesChartObj.destroy();
+                salesChartObj = new Chart(ctx, {
+                    type: 'line',
+                    data: { labels: data.sales.map(s=>s.date.split('-').slice(1).join('/')), datasets:[{ label: 'Revenue', data: data.sales.map(s=>s.revenue), borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.2)', fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#6366f1' }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks:{color: textColor} }, y: { grid: { color: gridColor }, ticks:{color: textColor} } } }
+                });
+
+                let resT = await fetch(`${API_BASE}/api/admin/traffic`, { headers: getHeaders() });
+                let dataT = await resT.json();
+                let ctxT = document.getElementById('trafficChart').getContext('2d');
+                if(trafficChartObj) trafficChartObj.destroy();
+                trafficChartObj = new Chart(ctxT, {
+                    type: 'bar',
+                    data: { labels: dataT.map(t=>t.username.substring(0,8)), datasets:[{ label: 'GB', data: dataT.map(t=>t.gb), backgroundColor: '#ec4899', borderRadius: 6 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks:{color: textColor} }, y: { grid: { color: gridColor }, ticks:{color: textColor} } } }
+                });
+            } catch(e) {}
+        }
+
+        async function fetchUsers() {
+            try {
+                let res = await fetch(`${API_BASE}/api/admin/users`, { headers: getHeaders() });
+                usersList = await res.json();
+                renderUsers();
+            } catch (e) { showToast('Error fetching users', 'error'); }
+        }
+
+        function filterUsers() { renderUsers(document.getElementById('search-user').value); }
+        function renderUsers(filterText = "") {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+            usersList.filter(u => u.id.toString().includes(filterText) || (u.username && u.username.toLowerCase().includes(filterText.toLowerCase()))).forEach(u => {
+                const isExpired = u.expiry > 0 && u.expiry < Date.now();
+                const expiryStr = u.expiry > 0 ? new Date(u.expiry).toLocaleDateString() : "Never";
+                let badge = isExpired ? `<span class="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 px-2.5 py-1 rounded-md text-xs font-bold border border-rose-200 dark:border-rose-800">Expired</span>` : `<span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-md text-xs font-bold border border-emerald-200 dark:border-emerald-800">Active</span>`;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b dark:border-slate-800/50";
+                tr.innerHTML = `
+                    <td class="px-6 py-4"><div class="font-bold dark:text-white flex items-center"><div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-500 flex items-center justify-center mr-3 text-xs">${u.username.charAt(0).toUpperCase()}</div>${u.username||'NoName'}</div><div class="text-[11px] text-slate-400 font-mono mt-1 ml-11">${u.id}</div></td>
+                    <td class="px-6 py-4"><div class="mb-1.5">${badge}</div><div class="text-[11px] text-slate-500 font-medium"><i class="fa-regular fa-calendar mr-1"></i>${expiryStr}</div></td>
+                    <td class="px-6 py-4 text-center dark:text-white font-medium">${u.devices === 0 ? "Unlim" : u.devices}</td>
+                    <td class="px-6 py-4 text-right space-x-2">
+                        <button onclick="giftUser(${u.id})" class="p-2.5 bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-900/50 rounded-xl transition shadow-sm" title="Gift 24h Free"><i class="fa-solid fa-gift"></i></button>
+                        <button onclick="openAddDaysModal(${u.id})" class="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-xl transition shadow-sm" title="Add Days"><i class="fa-solid fa-calendar-plus"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function fetchServers() {
+            const grid = document.getElementById('server-grid');
+            grid.innerHTML = '<div class="col-span-full flex justify-center py-10"><i class="fa-solid fa-circle-notch fa-spin text-3xl text-primary"></i></div>';
+            try {
+                let res = await fetch(`${API_BASE}/api/admin/servers`, { headers: getHeaders() });
+                let servers = await res.json();
+                grid.innerHTML = '';
+                servers.forEach(s => {
+                    const pctCPU = s.status==='online' ? s.cpu.toFixed(1) : 0;
+                    const pctRAM = s.status==='online' ? ((s.mem/s.memTotal)*100).toFixed(1) : 0;
+                    const color = s.status === 'online' ? 'bg-emerald-500 shadow-emerald-500/50' : 'bg-rose-500 shadow-rose-500/50';
+                    grid.innerHTML += `
+                        <div class="bg-white dark:bg-darkSurface p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:shadow-md transition">
+                            <div class="flex justify-between items-start mb-6">
+                                <div><h4 class="font-bold text-lg dark:text-white">${s.name}</h4><p class="text-xs text-slate-400 font-mono mt-1">${s.ip}</p></div>
+                                <div class="flex items-center bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-100 dark:border-slate-700"><span class="flex w-2.5 h-2.5 ${color} rounded-full shadow-sm mr-2 animate-pulse"></span><span class="text-[10px] font-bold uppercase text-slate-600 dark:text-slate-300 tracking-wider">${s.status}</span></div>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1.5 font-medium text-slate-600 dark:text-slate-400"><span>CPU Load</span><span>${pctCPU}%</span></div>
+                                    <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2"><div class="bg-gradient-to-r from-blue-400 to-indigo-500 h-2 rounded-full transition-all duration-1000" style="width: ${pctCPU}%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1.5 font-medium text-slate-600 dark:text-slate-400"><span>RAM Usage</span><span>${pctRAM}%</span></div>
+                                    <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2"><div class="bg-gradient-to-r from-pink-400 to-rose-500 h-2 rounded-full transition-all duration-1000" style="width: ${pctRAM}%"></div></div>
+                                </div>
+                                <div class="pt-4 mt-2 border-t border-slate-100 dark:border-slate-800/50 flex justify-between text-sm font-medium">
+                                    <span class="text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-lg"><i class="fa-solid fa-users mr-1.5"></i>${s.connections||0}</span>
+                                    <span class="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1 rounded-lg"><i class="fa-solid fa-clock mr-1.5"></i>${Math.floor((s.uptime||0)/86400)}d</span>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+            } catch(e) { grid.innerHTML = '<p class="text-rose-500 col-span-full">Error connecting to servers API. Check Python console.</p>'; }
+        }
+
+        async function fetchPromos() {
+            let res = await fetch(`${API_BASE}/api/admin/promocodes`, { headers: getHeaders() });
+            let promos = await res.json();
+            document.getElementById('promo-table').innerHTML = promos.map(p => `
+                <tr class="dark:text-white border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/30"><td class="py-4 px-4 font-mono font-bold text-primary">${p.code}</td><td class="px-4"><span class="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-1 rounded text-xs font-bold">+${p.value} days</span></td><td class="text-right px-4 font-medium">${p.uses} / ${p.max}</td></tr>
+            `).join('');
+        }
+        
+        async function createPromo(e) {
+            e.preventDefault();
+            await fetch(`${API_BASE}/api/admin/promocodes`, {
+                method: 'POST', headers: getHeaders(),
+                body: JSON.stringify({ code: document.getElementById('promo-code').value, type: 'days', value: document.getElementById('promo-val').value, max_uses: document.getElementById('promo-max').value })
+            });
+            showToast('Promo Created!', 'success'); fetchPromos(); e.target.reset();
+        }
+
+        async function sendBroadcast(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-broadcast'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Sending...';
+            try {
+                let res = await fetch(`${API_BASE}/api/admin/broadcast_v2`, {
+                    method: 'POST', headers: getHeaders(),
+                    body: JSON.stringify({ target: document.getElementById('bc-target').value, text: document.getElementById('bc-text').value })
+                });
+                let data = await res.json();
+                showToast(`Sent to ${data.count} users!`, 'success');
+                e.target.reset();
+            } catch(err) { showToast('Broadcast Error', 'error'); }
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i> Launch Broadcast';
+        }
+
+        async function fetchLogs() {
+            let res = await fetch(`${API_BASE}/api/admin/audit_logs`, { headers: getHeaders() });
+            let logs = await res.json();
+            document.getElementById('logs-table').innerHTML = logs.map(l => `
+                <tr class="dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/30 border-b border-slate-50 dark:border-slate-800/50"><td class="py-3 px-4 text-xs text-slate-500">${new Date(l.time).toLocaleString()}</td><td class="px-4 font-bold text-primary">@${l.admin}</td><td class="px-4">${l.action}</td></tr>
+            `).join('');
+        }
+
+        async function giftUser(id) {
+            if(!confirm(`Gift 24 hours to User ${id}?`)) return;
+            await fetch(`${API_BASE}/api/admin/gift`, { method: 'POST', headers: getHeaders(), body: JSON.stringify({id: id})});
+            showToast('Gift sent!', 'success'); fetchUsers();
+        }
+
+        function openAddDaysModal(id) {
+            selectedUserIdForDays = id; document.getElementById('modal-uid').innerText = id;
+            document.getElementById('add-days-modal').classList.remove('hidden'); document.getElementById('add-days-modal').classList.add('flex');
+        }
+        function closeModal() { document.getElementById('add-days-modal').classList.add('hidden'); document.getElementById('add-days-modal').classList.remove('flex'); selectedUserIdForDays = null; }
+
+        async function confirmAddDays() {
+            const days = parseInt(document.getElementById('days-to-add').value);
+            if (!days || !selectedUserIdForDays) return;
+            try {
+                let res = await fetch(`${API_BASE}/api/admin/add_days`, { method: 'POST', headers: getHeaders(), body: JSON.stringify({ id: selectedUserIdForDays, days: days }) });
+                if((await res.json()).success) { showToast(`Added ${days} days!`, 'success'); closeModal(); fetchUsers(); }
+            } catch(e) { showToast('Error', 'error'); }
+        }
+
+        async function generateSubscription(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-generate'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Generating...';
+            try {
+                let res = await fetch(`${API_BASE}/api/admin/generate`, {
+                    method: 'POST', headers: getHeaders(),
+                    body: JSON.stringify({ tg_id: document.getElementById('gen-user-id').value, devices: document.getElementById('gen-devices').value, months: document.getElementById('gen-months').value })
+                });
+                if((await res.json()).success) { showToast('Sub generated & sent!', 'success'); e.target.reset(); }
+                else showToast('X-UI API Error', 'error');
+            } catch(e) { showToast('Connection Error', 'error'); }
+            btn.innerHTML = '<i class="fa-solid fa-magic mr-2 text-pink-400"></i> Issue & Send';
+        }
+    </script>
+</body>
+</html>
