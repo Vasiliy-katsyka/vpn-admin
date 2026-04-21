@@ -167,7 +167,27 @@
                             <div class="w-12 h-12 bg-amber-50 dark:bg-amber-900/50 text-amber-500 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-ruble-sign"></i></div>
                         </div>
                     </div>
-
+                    <!-- RECENT TRANSACTIONS (Добавить в конец <div id="tab-dashboard">) -->
+                    <div class="mt-6 bg-white dark:bg-darkSurface p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-lg dark:text-white">Recent Transactions</h3>
+                            <span class="text-xs bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-1 rounded-md font-bold border border-emerald-200 dark:border-emerald-800">-8% Fee Applied</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm whitespace-nowrap">
+                                <thead>
+                                    <tr class="text-slate-500 border-b dark:border-slate-700">
+                                        <th class="px-4 py-3">User</th>
+                                        <th class="px-4 py-3">Plan</th>
+                                        <th class="px-4 py-3">Date</th>
+                                        <th class="px-4 py-3 text-right">Net Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactions-table-body" class="divide-y divide-slate-100 dark:divide-slate-800/50">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                         <div class="bg-white dark:bg-darkSurface p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
                             <h3 class="font-bold text-lg mb-4 dark:text-white">Revenue (Last 14 Days)</h3>
@@ -343,7 +363,7 @@
                 document.getElementById('admin-name').innerText = '@' + user;
                 
                 // Initialize Data
-                fetchStats(); fetchCharts(); fetchUsers();
+                fetchStats(); fetchCharts(); fetchUsers(); fetchTransactions();
             } else {
                 document.getElementById('app-container').classList.add('hidden');
                 document.getElementById('login-screen').classList.remove('hidden', 'opacity-0', 'pointer-events-none');
@@ -474,6 +494,21 @@
             } catch(e) {}
         }
 
+        async function fetchTransactions() {
+            try {
+                let res = await fetch(`${API_BASE}/api/admin/transactions`, { headers: getHeaders() });
+                let transactions = await res.json();
+                document.getElementById('transactions-table-body').innerHTML = transactions.map(t => `
+                    <tr class="dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition">
+                        <td class="py-3 px-4 flex items-center"><div class="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-500 flex items-center justify-center mr-2 text-[10px] font-bold">${t.username.charAt(0).toUpperCase()}</div> @${t.username}</td>
+                        <td class="px-4 text-xs font-medium text-slate-500">${t.plan}</td>
+                        <td class="px-4 text-xs text-slate-400">${new Date(t.date).toLocaleString()}</td>
+                        <td class="px-4 text-right font-bold text-emerald-500">+₽ ${t.net_revenue}</td>
+                    </tr>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+        
         async function fetchUsers() {
             try {
                 let res = await fetch(`${API_BASE}/api/admin/users`, { headers: getHeaders() });
@@ -489,8 +524,15 @@
             usersList.filter(u => u.id.toString().includes(filterText) || (u.username && u.username.toLowerCase().includes(filterText.toLowerCase()))).forEach(u => {
                 const isExpired = u.expiry > 0 && u.expiry < Date.now();
                 const expiryStr = u.expiry > 0 ? new Date(u.expiry).toLocaleDateString() : "Never";
-                let badge = isExpired ? `<span class="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 px-2.5 py-1 rounded-md text-xs font-bold border border-rose-200 dark:border-rose-800">Expired</span>` : `<span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-md text-xs font-bold border border-emerald-200 dark:border-emerald-800">Active</span>`;
-
+                
+                let badge;
+                if (u.expiry === 0) {
+                    badge = `<span class="bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 px-2.5 py-1 rounded-md text-xs font-bold border border-slate-200 dark:border-slate-700">No Activity</span>`;
+                } else if (isExpired) {
+                    badge = `<span class="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 px-2.5 py-1 rounded-md text-xs font-bold border border-rose-200 dark:border-rose-800">Expired</span>`;
+                } else {
+                    badge = `<span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-md text-xs font-bold border border-emerald-200 dark:border-emerald-800">Active</span>`;
+                }
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b dark:border-slate-800/50";
                 tr.innerHTML = `
