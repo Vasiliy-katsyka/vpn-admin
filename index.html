@@ -186,6 +186,13 @@
                                 <tbody id="transactions-table-body" class="divide-y divide-slate-100 dark:divide-slate-800/50">
                                 </tbody>
                             </table>
+                            </table>
+                            <!-- Кнопка загрузки дополнительных транзакций -->
+                            <div class="mt-4 flex justify-center pb-2">
+                                <button id="btn-more-tx" onclick="loadMoreTransactions()" class="hidden px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl transition text-sm font-bold shadow-sm">
+                                    Show More <i class="fa-solid fa-chevron-down ml-1"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
@@ -493,20 +500,44 @@
                 });
             } catch(e) {}
         }
-
+        
+        let allTransactions =[];
+        let txLimit = 3;
+        
         async function fetchTransactions() {
             try {
                 let res = await fetch(`${API_BASE}/api/admin/transactions`, { headers: getHeaders() });
-                let transactions = await res.json();
-                document.getElementById('transactions-table-body').innerHTML = transactions.map(t => `
-                    <tr class="dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition">
-                        <td class="py-3 px-4 flex items-center"><div class="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-500 flex items-center justify-center mr-2 text-[10px] font-bold">${t.username.charAt(0).toUpperCase()}</div> @${t.username}</td>
-                        <td class="px-4 text-xs font-medium text-slate-500">${t.plan}</td>
-                        <td class="px-4 text-xs text-slate-400">${new Date(t.date).toLocaleString()}</td>
-                        <td class="px-4 text-right font-bold text-emerald-500">+₽ ${t.net_revenue}</td>
-                    </tr>
-                `).join('');
+                allTransactions = await res.json();
+                txLimit = 3; // Сброс до 3-х элементов при новой загрузке
+                renderTransactions();
             } catch(e) { console.error(e); }
+        }
+        
+        function renderTransactions() {
+            const container = document.getElementById('transactions-table-body');
+            const visibleTxs = allTransactions.slice(0, txLimit);
+            
+            container.innerHTML = visibleTxs.map(t => `
+                <tr class="dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition">
+                    <td class="py-3 px-4 flex items-center"><div class="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-500 flex items-center justify-center mr-2 text-[10px] font-bold">${t.username.charAt(0).toUpperCase()}</div> @${t.username}</td>
+                    <td class="px-4 text-xs font-medium text-slate-500">${t.plan}</td>
+                    <td class="px-4 text-xs text-slate-400">${new Date(t.date).toLocaleString()}</td>
+                    <td class="px-4 text-right font-bold text-emerald-500">+₽ ${t.net_revenue}</td>
+                </tr>
+            `).join('');
+        
+            // Показываем/прячем кнопку
+            const btn = document.getElementById('btn-more-tx');
+            if (allTransactions.length > txLimit) {
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
+            }
+        }
+        
+        function loadMoreTransactions() {
+            txLimit += 5; // При клике подгружаем еще по 5 штук
+            renderTransactions();
         }
         
         async function fetchUsers() {
