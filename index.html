@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compact VPN - Admin Console</title>
+    <title>Compact VPN - Панель администратора</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -45,8 +45,8 @@
                 <div class="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg text-white text-2xl">
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-800 dark:text-white">Admin Access</h2>
-                <p class="text-sm text-slate-500 mt-1">Please enter your credentials</p>
+                <h2 class="text-2xl font-bold text-slate-800 dark:text-white">Доступ администратора</h2>
+                <p class="text-sm text-slate-500 mt-1">Пожалуйста, введите ваши учетные данные</p>
             </div>
             <form onsubmit="performLogin(event)" class="space-y-4">
                 <div>
@@ -58,11 +58,11 @@
                 <div>
                     <div class="relative">
                         <i class="fa-solid fa-lock absolute left-4 top-3.5 text-slate-400"></i>
-                        <input id="login-pass" type="password" required placeholder="Password" class="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary outline-none transition dark:text-white">
+                        <input id="login-pass" type="password" required placeholder="Пароль" class="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary outline-none transition dark:text-white">
                     </div>
                 </div>
                 <button type="submit" class="w-full bg-gradient-to-r from-primary to-indigo-600 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-indigo-500/30 transition-all transform hover:-translate-y-0.5 mt-2">
-                    Log In
+                    Войти
                 </button>
             </form>
         </div>
@@ -85,25 +85,25 @@
                 </div>
                 <nav class="p-4 space-y-1 mt-2 text-sm">
                     <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
-                        <i class="fa-solid fa-chart-pie w-5 text-center text-slate-400"></i><span>Dashboard</span>
+                        <i class="fa-solid fa-chart-pie w-5 text-center text-slate-400"></i><span>Обзор</span>
                     </button>
                     <button onclick="switchTab('users')" id="nav-users" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
-                        <i class="fa-solid fa-users w-5 text-center text-slate-400"></i><span>Users</span>
+                        <i class="fa-solid fa-users w-5 text-center text-slate-400"></i><span>Пользователи</span>
                     </button>
                     <button onclick="switchTab('servers')" id="nav-servers" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
-                        <i class="fa-solid fa-server w-5 text-center text-slate-400"></i><span>Server Health</span>
+                        <i class="fa-solid fa-server w-5 text-center text-slate-400"></i><span>Состояние серверов</span>
                     </button>
                     <button onclick="switchTab('promos')" id="nav-promos" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
-                        <i class="fa-solid fa-ticket w-5 text-center text-slate-400"></i><span>Promocodes</span>
+                        <i class="fa-solid fa-ticket w-5 text-center text-slate-400"></i><span>Промокоды</span>
                     </button>
                     <button onclick="switchTab('broadcast')" id="nav-broadcast" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
-                        <i class="fa-solid fa-bullhorn w-5 text-center text-slate-400"></i><span>Broadcast</span>
+                        <i class="fa-solid fa-bullhorn w-5 text-center text-slate-400"></i><span>Рассылка</span>
                     </button>
                     <button onclick="switchTab('generate')" id="nav-generate" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
-                        <i class="fa-solid fa-gift w-5 text-center text-slate-400"></i><span>Issue Sub</span>
+                        <i class="fa-solid fa-gift w-5 text-center text-slate-400"></i><span>Выдать подписку</span>
                     </button>
                     <button onclick="switchTab('logs')" id="nav-logs" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
-                        <i class="fa-solid fa-list-check w-5 text-center text-slate-400"></i><span>Audit Logs</span>
+                        <i class="fa-solid fa-list-check w-5 text-center text-slate-400"></i><span>Журнал аудита</span>
                     </button>
                 </nav>
             </div>
@@ -113,7 +113,7 @@
                         <img src="https://ui-avatars.com/api/?name=A&background=6366f1&color=fff" class="w-10 h-10 rounded-full shadow-md border-2 border-white dark:border-slate-700">
                         <div>
                             <p id="admin-name" class="text-sm font-bold text-slate-800 dark:text-slate-200">@admin</p>
-                            <p class="text-xs text-green-500 font-medium flex items-center"><span class="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span>Online</p>
+                            <p class="text-xs text-green-500 font-medium flex items-center"><span class="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span>В сети</p>
                         </div>
                     </div>
                     <button onclick="logout()" class="text-slate-400 hover:text-red-500 transition"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
@@ -127,11 +127,11 @@
             <header class="h-16 md:h-20 flex items-center justify-between px-4 md:px-8 bg-white/80 dark:bg-darkSurface/80 backdrop-blur-md shadow-sm z-10 border-b border-slate-100 dark:border-slate-800">
                 <div class="flex items-center">
                     <button onclick="toggleSidebar()" class="md:hidden mr-4 text-slate-600 dark:text-slate-300 text-xl p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"><i class="fa-solid fa-bars"></i></button>
-                    <h2 id="page-title" class="text-xl md:text-2xl font-bold text-slate-800 dark:text-white truncate">Dashboard Overview</h2>
+                    <h2 id="page-title" class="text-xl md:text-2xl font-bold text-slate-800 dark:text-white truncate">Обзор панели управления</h2>
                 </div>
                 <div class="flex items-center space-x-2 md:space-x-4">
                     <button onclick="downloadBackup()" class="hidden md:flex px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-medium transition shadow-lg items-center">
-                        <i class="fa-solid fa-database mr-2"></i> DB Backup
+                        <i class="fa-solid fa-database mr-2"></i> Бэкап БД
                     </button>
                     <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 transition flex items-center justify-center">
                         <i id="theme-icon" class="fa-solid fa-moon"></i>
@@ -147,21 +147,21 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                         <div class="bg-white dark:bg-darkSurface p-5 md:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between">
                             <div>
-                                <p class="text-sm text-slate-500 font-medium mb-1">Total Users</p>
+                                <p class="text-sm text-slate-500 font-medium mb-1">Всего пользователей</p>
                                 <h3 class="text-3xl font-bold dark:text-white skeleton" id="stat-total-users">000</h3>
                             </div>
                             <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/50 text-indigo-500 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-users"></i></div>
                         </div>
                         <div class="bg-white dark:bg-darkSurface p-5 md:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between">
                             <div>
-                                <p class="text-sm text-slate-500 font-medium mb-1">Active Subs</p>
+                                <p class="text-sm text-slate-500 font-medium mb-1">Активные подписки</p>
                                 <h3 class="text-3xl font-bold dark:text-white skeleton" id="stat-active-subs">000</h3>
                             </div>
                             <div class="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/50 text-emerald-500 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-check-circle"></i></div>
                         </div>
                         <div class="bg-white dark:bg-darkSurface p-5 md:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between">
                             <div>
-                                <p class="text-sm text-slate-500 font-medium mb-1">Est. Revenue</p>
+                                <p class="text-sm text-slate-500 font-medium mb-1">Примерный доход</p>
                                 <h3 class="text-3xl font-bold dark:text-white skeleton" id="stat-revenue">000</h3>
                             </div>
                             <div class="w-12 h-12 bg-amber-50 dark:bg-amber-900/50 text-amber-500 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-ruble-sign"></i></div>
@@ -170,17 +170,17 @@
                     <!-- RECENT TRANSACTIONS (Добавить в конец <div id="tab-dashboard">) -->
                     <div class="mt-6 bg-white dark:bg-darkSurface p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="font-bold text-lg dark:text-white">Recent Transactions</h3>
-                            <span class="text-xs bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-1 rounded-md font-bold border border-emerald-200 dark:border-emerald-800">-8% Fee Applied</span>
+                            <h3 class="font-bold text-lg dark:text-white">Последние транзакции</h3>
+                            <span class="text-xs bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-1 rounded-md font-bold border border-emerald-200 dark:border-emerald-800">Применена комиссия -8%</span>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm whitespace-nowrap">
                                 <thead>
                                     <tr class="text-slate-500 border-b dark:border-slate-700">
-                                        <th class="px-4 py-3">User</th>
-                                        <th class="px-4 py-3">Plan</th>
-                                        <th class="px-4 py-3">Date</th>
-                                        <th class="px-4 py-3 text-right">Net Revenue</th>
+                                        <th class="px-4 py-3">Пользователь</th>
+                                        <th class="px-4 py-3">Тариф</th>
+                                        <th class="px-4 py-3">Дата</th>
+                                        <th class="px-4 py-3 text-right">Чистая прибыль</th>
                                     </tr>
                                 </thead>
                                 <tbody id="transactions-table-body" class="divide-y divide-slate-100 dark:divide-slate-800/50">
@@ -190,21 +190,21 @@
                             <!-- Кнопка загрузки дополнительных транзакций -->
                             <div class="mt-4 flex justify-center pb-2">
                                 <button id="btn-more-tx" onclick="loadMoreTransactions()" class="hidden px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl transition text-sm font-bold shadow-sm">
-                                    Show More <i class="fa-solid fa-chevron-down ml-1"></i>
+                                    Показать еще <i class="fa-solid fa-chevron-down ml-1"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                         <div class="bg-white dark:bg-darkSurface p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-                            <h3 class="font-bold text-lg mb-4 dark:text-white">Revenue (Last 14 Days)</h3>
+                            <h3 class="font-bold text-lg mb-4 dark:text-white">Доход (Последние 14 дней)</h3>
                             <!-- FIX FOR CHARTS: relative container with fixed height -->
                             <div class="relative h-64 w-full">
                                 <canvas id="salesChart"></canvas>
                             </div>
                         </div>
                         <div class="bg-white dark:bg-darkSurface p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-                            <h3 class="font-bold text-lg mb-4 dark:text-white">Top 10 Data Consumers (GB)</h3>
+                            <h3 class="font-bold text-lg mb-4 dark:text-white">Топ 10 по потреблению трафика (ГБ)</h3>
                             <div class="relative h-64 w-full">
                                 <canvas id="trafficChart"></canvas>
                             </div>
@@ -218,18 +218,18 @@
                         <div class="p-4 md:p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/30">
                             <div class="relative w-full md:w-72">
                                 <i class="fa-solid fa-search absolute left-4 top-3.5 text-slate-400"></i>
-                                <input type="text" id="search-user" onkeyup="filterUsers()" placeholder="Search ID or Username..." class="w-full pl-11 pr-4 py-3 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-primary text-sm dark:text-white">
+                                <input type="text" id="search-user" onkeyup="filterUsers()" placeholder="Поиск по ID или имени пользователя..." class="w-full pl-11 pr-4 py-3 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-primary text-sm dark:text-white">
                             </div>
-                            <button onclick="fetchUsers()" class="w-full md:w-auto px-5 py-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-100 transition font-medium flex items-center justify-center"><i class="fa-solid fa-rotate-right mr-2"></i> Refresh</button>
+                            <button onclick="fetchUsers()" class="w-full md:w-auto px-5 py-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-100 transition font-medium flex items-center justify-center"><i class="fa-solid fa-rotate-right mr-2"></i> Обновить</button>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left whitespace-nowrap">
                                 <thead>
                                     <tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-xs uppercase tracking-wider border-b dark:border-slate-700">
-                                        <th class="px-6 py-4 font-semibold">User Info</th>
-                                        <th class="px-6 py-4 font-semibold">Status / Expiry</th>
-                                        <th class="px-6 py-4 font-semibold text-center">Devices</th>
-                                        <th class="px-6 py-4 font-semibold text-right">Actions</th>
+                                        <th class="px-6 py-4 font-semibold">Информация о пользователе</th>
+                                        <th class="px-6 py-4 font-semibold">Статус / Истекает</th>
+                                        <th class="px-6 py-4 font-semibold text-center">Устройства</th>
+                                        <th class="px-6 py-4 font-semibold text-right">Действия</th>
                                     </tr>
                                 </thead>
                                 <tbody id="users-table-body" class="divide-y divide-slate-100 dark:divide-slate-800/50 text-sm">
@@ -242,8 +242,8 @@
                 <!-- SERVERS -->
                 <div id="tab-servers" class="hidden fade-in space-y-6">
                     <div class="flex justify-between items-center bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
-                        <p class="text-sm text-indigo-800 dark:text-indigo-300 flex items-center"><i class="fa-solid fa-circle-info mr-2 text-indigo-500"></i>Live monitoring of X-UI instances.</p>
-                        <button onclick="fetchServers()" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm font-medium"><i class="fa-solid fa-sync mr-1"></i> Sync</button>
+                        <p class="text-sm text-indigo-800 dark:text-indigo-300 flex items-center"><i class="fa-solid fa-circle-info mr-2 text-indigo-500"></i>Живой мониторинг инстансов X-UI.</p>
+                        <button onclick="fetchServers()" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm font-medium"><i class="fa-solid fa-sync mr-1"></i> Синхронизировать</button>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6" id="server-grid"></div>
                 </div>
@@ -252,25 +252,25 @@
                 <div id="tab-promos" class="hidden fade-in space-y-6">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="col-span-1 bg-white dark:bg-darkSurface p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-                            <h3 class="text-lg font-bold dark:text-white mb-4">Create Code</h3>
+                            <h3 class="text-lg font-bold dark:text-white mb-4">Создать код</h3>
                             <form onsubmit="createPromo(event)" class="space-y-4">
-                                <div><label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Code Word</label><input id="promo-code" required class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white" placeholder="SUMMER24"></div>
+                                <div><label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Кодовое слово</label><input id="promo-code" required class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white" placeholder="SUMMER24"></div>
                                 
                                 <div>
-                                    <label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Reward Type</label>
+                                    <label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Тип вознаграждения</label>
                                     <select id="promo-type" class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white outline-none">
-                                        <option value="days">Add Free Days</option>
-                                        <option value="discount">Discount (%)</option>
+                                        <option value="days">Добавить бесплатные дни</option>
+                                        <option value="discount">Скидка (%)</option>
                                     </select>
                                 </div>
                             
-                                <div><label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Reward Value</label><input id="promo-val" type="number" required class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white" value="7"></div>
-                                <div><label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Max Uses</label><input id="promo-max" type="number" required class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white" value="100"></div>
-                                <button class="w-full bg-primary hover:bg-indigo-600 text-white py-3 rounded-xl font-bold transition shadow-lg hover:-translate-y-0.5">Create Code</button>
+                                <div><label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Размер вознаграждения</label><input id="promo-val" type="number" required class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white" value="7"></div>
+                                <div><label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Максимум использований</label><input id="promo-max" type="number" required class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white" value="100"></div>
+                                <button class="w-full bg-primary hover:bg-indigo-600 text-white py-3 rounded-xl font-bold transition shadow-lg hover:-translate-y-0.5">Создать код</button>
                             </form>
                         </div>
                         <div class="col-span-1 lg:col-span-2 bg-white dark:bg-darkSurface p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-x-auto">
-                            <h3 class="text-lg font-bold dark:text-white mb-4">Active Promocodes</h3>
+                            <h3 class="text-lg font-bold dark:text-white mb-4">Активные промокоды</h3>
                             <table class="w-full text-left text-sm whitespace-nowrap"><tbody id="promo-table" class="divide-y divide-slate-100 dark:divide-slate-800/50"></tbody></table>
                         </div>
                     </div>
@@ -280,23 +280,23 @@
                 <div id="tab-broadcast" class="hidden fade-in space-y-6 flex justify-center">
                     <div class="bg-white dark:bg-darkSurface p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 w-full max-w-2xl relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10"></div>
-                        <h3 class="text-xl font-bold dark:text-white mb-6 flex items-center"><i class="fa-solid fa-bullseye text-primary mr-2"></i> Surgical Messaging</h3>
+                        <h3 class="text-xl font-bold dark:text-white mb-6 flex items-center"><i class="fa-solid fa-bullseye text-primary mr-2"></i> Точечная рассылка</h3>
                         <form onsubmit="sendBroadcast(event)" class="space-y-5">
                             <div>
-                                <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Select Target Audience</label>
+                                <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Выберите целевую аудиторию</label>
                                 <select id="bc-target" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-primary dark:text-white outline-none">
-                                    <option value="all">All Users in Database</option>
-                                    <option value="active">Active Subscriptions Only</option>
-                                    <option value="expired">Expired Subscriptions (Win-back)</option>
-                                    <option value="trial">Trial Users Only</option>
+                                    <option value="all">Все пользователи в базе данных</option>
+                                    <option value="active">Только активные подписки</option>
+                                    <option value="expired">Истекшие подписки (Возврат)</option>
+                                    <option value="trial">Только пробные пользователи</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Message Content (HTML Allowed)</label>
-                                <textarea id="bc-text" rows="5" required placeholder="Hello! We just added a new server..." class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-primary dark:text-white outline-none"></textarea>
+                                <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Содержимое сообщения (разрешен HTML)</label>
+                                <textarea id="bc-text" rows="5" required placeholder="Привет! Мы только что добавили новый сервер..." class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-primary dark:text-white outline-none"></textarea>
                             </div>
                             <button type="submit" id="btn-broadcast" class="w-full bg-gradient-to-r from-primary to-indigo-600 hover:from-indigo-600 hover:to-primary text-white py-4 rounded-xl font-bold transition shadow-lg hover:-translate-y-0.5 flex justify-center items-center text-lg">
-                                <i class="fa-solid fa-paper-plane mr-2"></i> Launch Broadcast
+                                <i class="fa-solid fa-paper-plane mr-2"></i> Запустить рассылку
                             </button>
                         </form>
                     </div>
@@ -306,7 +306,7 @@
                 <div id="tab-logs" class="hidden fade-in space-y-6">
                     <div class="bg-white dark:bg-darkSurface p-4 md:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-x-auto">
                         <table class="w-full text-left text-sm whitespace-nowrap">
-                            <thead><tr class="text-slate-500 uppercase text-xs border-b dark:border-slate-700"><th class="px-4 py-3">Time</th><th class="px-4 py-3">Admin</th><th class="px-4 py-3">Action Details</th></tr></thead>
+                            <thead><tr class="text-slate-500 uppercase text-xs border-b dark:border-slate-700"><th class="px-4 py-3">Время</th><th class="px-4 py-3">Администратор</th><th class="px-4 py-3">Детали действия</th></tr></thead>
                             <tbody id="logs-table" class="divide-y divide-slate-100 dark:divide-slate-800/50"></tbody>
                         </table>
                     </div>
@@ -316,15 +316,15 @@
                 <div id="tab-generate" class="hidden fade-in space-y-6 flex justify-center">
                     <div class="bg-white dark:bg-darkSurface p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 w-full max-w-2xl relative overflow-hidden">
                         <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-pink-500/10 rounded-full blur-3xl -z-10"></div>
-                        <h3 class="text-2xl font-bold dark:text-white mb-2">Issue Subscription</h3>
-                        <p class="text-sm text-slate-500 mb-6">Generate a VPN link and send it directly via Bot DM.</p>
+                        <h3 class="text-2xl font-bold dark:text-white mb-2">Выдать подписку</h3>
+                        <p class="text-sm text-slate-500 mb-6">Сгенерируйте VPN-ссылку и отправьте ее напрямую через личные сообщения бота.</p>
                         <form onsubmit="generateSubscription(event)" class="space-y-5">
-                            <div><label class="block text-sm font-medium mb-1 text-slate-600 dark:text-slate-400">Telegram ID / @username</label><input type="text" id="gen-user-id" required placeholder="e.g. 5146625949" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-primary dark:text-white outline-none"></div>
+                            <div><label class="block text-sm font-medium mb-1 text-slate-600 dark:text-slate-400">Telegram ID / @username</label><input type="text" id="gen-user-id" required placeholder="напр. 5146625949" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-primary dark:text-white outline-none"></div>
                             <div class="grid grid-cols-2 gap-4">
-                                <div><label class="block text-sm font-medium mb-1 text-slate-600 dark:text-slate-400">Devices</label><select id="gen-devices" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl dark:text-white outline-none"><option value="1">1 Device</option><option value="3">3 Devices</option><option value="0">Unlimited</option></select></div>
-                                <div><label class="block text-sm font-medium mb-1 text-slate-600 dark:text-slate-400">Months</label><select id="gen-months" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl dark:text-white outline-none"><option value="1">1 Month</option><option value="12">12 Months</option></select></div>
+                                <div><label class="block text-sm font-medium mb-1 text-slate-600 dark:text-slate-400">Устройства</label><select id="gen-devices" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl dark:text-white outline-none"><option value="1">1 Устройство</option><option value="3">3 Устройства</option><option value="0">Безлимит</option></select></div>
+                                <div><label class="block text-sm font-medium mb-1 text-slate-600 dark:text-slate-400">Месяцы</label><select id="gen-months" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl dark:text-white outline-none"><option value="1">1 Месяц</option><option value="12">12 Месяцев</option></select></div>
                             </div>
-                            <button type="submit" id="btn-generate" class="w-full bg-slate-800 dark:bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg hover:-translate-y-0.5 transition flex justify-center items-center text-lg mt-2"><i class="fa-solid fa-magic mr-2 text-pink-400"></i> Issue & Send</button>
+                            <button type="submit" id="btn-generate" class="w-full bg-slate-800 dark:bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg hover:-translate-y-0.5 transition flex justify-center items-center text-lg mt-2"><i class="fa-solid fa-magic mr-2 text-pink-400"></i> Выдать и Отправить</button>
                         </form>
                     </div>
                 </div>
@@ -336,12 +336,12 @@
     <!-- Modals & Toasts -->
     <div id="add-days-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-[60] transition-opacity p-4">
         <div class="bg-white dark:bg-darkSurface p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-200 dark:border-slate-700 transform transition-transform">
-            <h3 class="text-xl font-bold dark:text-white mb-2">Add Bonus Days</h3>
-            <p class="text-sm text-slate-500 mb-6">Top up balance for user: <span id="modal-uid" class="font-bold text-primary bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded"></span></p>
+            <h3 class="text-xl font-bold dark:text-white mb-2">Добавить бонусные дни</h3>
+            <p class="text-sm text-slate-500 mb-6">Пополнить баланс пользователя: <span id="modal-uid" class="font-bold text-primary bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded"></span></p>
             <input type="number" id="days-to-add" value="30" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl mb-6 dark:text-white font-medium text-lg outline-none focus:ring-2 focus:ring-primary">
             <div class="flex space-x-3">
-                <button onclick="closeModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 py-3 rounded-xl font-bold transition">Cancel</button>
-                <button onclick="confirmAddDays()" class="flex-1 bg-primary hover:bg-indigo-600 text-white py-3 rounded-xl font-bold transition shadow-lg">Confirm</button>
+                <button onclick="closeModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 py-3 rounded-xl font-bold transition">Отмена</button>
+                <button onclick="confirmAddDays()" class="flex-1 bg-primary hover:bg-indigo-600 text-white py-3 rounded-xl font-bold transition shadow-lg">Подтвердить</button>
             </div>
         </div>
     </div>
@@ -384,10 +384,10 @@
             
             if((u === 'katsyka' || u === 'grachev5') && p === 'compact2026') {
                 sessionStorage.setItem('admin_user', u);
-                showToast(`Welcome back, ${u}!`, 'success');
+                showToast(`Добро пожаловать, ${u}!`, 'success');
                 checkAuth();
             } else {
-                showToast('Invalid credentials!', 'error');
+                showToast('Неверные учетные данные!', 'error');
             }
         }
 
@@ -447,8 +447,8 @@
             const navBtn = document.getElementById(`nav-${tabId}`);
             navBtn.classList.add('active'); navBtn.querySelector('i').classList.add('text-white');
             
-            const titles = { dashboard: 'Dashboard Overview', users: 'User Management', servers: 'Server Health', promos: 'Promo Codes', broadcast: 'Broadcast System', logs: 'System Logs', generate: 'Issue Subscription'};
-            document.getElementById('page-title').innerText = titles[tabId] || 'Panel';
+            const titles = { dashboard: 'Обзор панели управления', users: 'Управление пользователями', servers: 'Состояние серверов', promos: 'Промокоды', broadcast: 'Система рассылок', logs: 'Системные журналы', generate: 'Выдача подписки'};
+            document.getElementById('page-title').innerText = titles[tabId] || 'Панель';
             
             // Close mobile sidebar on tab switch
             if(window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) toggleSidebar();
@@ -485,7 +485,7 @@
                 if(salesChartObj) salesChartObj.destroy();
                 salesChartObj = new Chart(ctx, {
                     type: 'line',
-                    data: { labels: data.sales.map(s=>s.date.split('-').slice(1).join('/')), datasets:[{ label: 'Revenue', data: data.sales.map(s=>s.revenue), borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.2)', fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#6366f1' }] },
+                    data: { labels: data.sales.map(s=>s.date.split('-').slice(1).join('/')), datasets:[{ label: 'Доход', data: data.sales.map(s=>s.revenue), borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.2)', fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#6366f1' }] },
                     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks:{color: textColor} }, y: { grid: { color: gridColor }, ticks:{color: textColor} } } }
                 });
 
@@ -495,7 +495,7 @@
                 if(trafficChartObj) trafficChartObj.destroy();
                 trafficChartObj = new Chart(ctxT, {
                     type: 'bar',
-                    data: { labels: dataT.map(t=>t.username.substring(0,8)), datasets:[{ label: 'GB', data: dataT.map(t=>t.gb), backgroundColor: '#ec4899', borderRadius: 6 }] },
+                    data: { labels: dataT.map(t=>t.username.substring(0,8)), datasets:[{ label: 'ГБ', data: dataT.map(t=>t.gb), backgroundColor: '#ec4899', borderRadius: 6 }] },
                     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks:{color: textColor} }, y: { grid: { color: gridColor }, ticks:{color: textColor} } } }
                 });
             } catch(e) {}
@@ -545,7 +545,7 @@
                 let res = await fetch(`${API_BASE}/api/admin/users`, { headers: getHeaders() });
                 usersList = await res.json();
                 renderUsers();
-            } catch (e) { showToast('Error fetching users', 'error'); }
+            } catch (e) { showToast('Ошибка получения пользователей', 'error'); }
         }
 
         function filterUsers() { renderUsers(document.getElementById('search-user').value); }
@@ -554,25 +554,25 @@
             tbody.innerHTML = '';
             usersList.filter(u => u.id.toString().includes(filterText) || (u.username && u.username.toLowerCase().includes(filterText.toLowerCase()))).forEach(u => {
                 const isExpired = u.expiry > 0 && u.expiry < Date.now();
-                const expiryStr = u.expiry > 0 ? new Date(u.expiry).toLocaleDateString() : "Never";
+                const expiryStr = u.expiry > 0 ? new Date(u.expiry).toLocaleDateString() : "Никогда";
                 
                 let badge;
                 if (u.expiry === 0) {
-                    badge = `<span class="bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 px-2.5 py-1 rounded-md text-xs font-bold border border-slate-200 dark:border-slate-700">No Activity</span>`;
+                    badge = `<span class="bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 px-2.5 py-1 rounded-md text-xs font-bold border border-slate-200 dark:border-slate-700">Нет активности</span>`;
                 } else if (isExpired) {
-                    badge = `<span class="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 px-2.5 py-1 rounded-md text-xs font-bold border border-rose-200 dark:border-rose-800">Expired</span>`;
+                    badge = `<span class="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 px-2.5 py-1 rounded-md text-xs font-bold border border-rose-200 dark:border-rose-800">Истекла</span>`;
                 } else {
-                    badge = `<span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-md text-xs font-bold border border-emerald-200 dark:border-emerald-800">Active</span>`;
+                    badge = `<span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-md text-xs font-bold border border-emerald-200 dark:border-emerald-800">Активна</span>`;
                 }
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b dark:border-slate-800/50";
                 tr.innerHTML = `
-                    <td class="px-6 py-4"><div class="font-bold dark:text-white flex items-center"><div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-500 flex items-center justify-center mr-3 text-xs">${u.username.charAt(0).toUpperCase()}</div>${u.username||'NoName'}</div><div class="text-[11px] text-slate-400 font-mono mt-1 ml-11">${u.id}</div></td>
+                    <td class="px-6 py-4"><div class="font-bold dark:text-white flex items-center"><div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-500 flex items-center justify-center mr-3 text-xs">${u.username.charAt(0).toUpperCase()}</div>${u.username||'Без Имени'}</div><div class="text-[11px] text-slate-400 font-mono mt-1 ml-11">${u.id}</div></td>
                     <td class="px-6 py-4"><div class="mb-1.5">${badge}</div><div class="text-[11px] text-slate-500 font-medium"><i class="fa-regular fa-calendar mr-1"></i>${expiryStr}</div></td>
-                    <td class="px-6 py-4 text-center dark:text-white font-medium">${u.devices === 0 ? "Unlim" : u.devices}</td>
+                    <td class="px-6 py-4 text-center dark:text-white font-medium">${u.devices === 0 ? "Безлимит" : u.devices}</td>
                     <td class="px-6 py-4 text-right space-x-2">
-                        <button onclick="giftUser(${u.id})" class="p-2.5 bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-900/50 rounded-xl transition shadow-sm" title="Gift 24h Free"><i class="fa-solid fa-gift"></i></button>
-                        <button onclick="openAddDaysModal(${u.id})" class="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-xl transition shadow-sm" title="Add Days"><i class="fa-solid fa-calendar-plus"></i></button>
+                        <button onclick="giftUser(${u.id})" class="p-2.5 bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-900/50 rounded-xl transition shadow-sm" title="Подарить 24ч бесплатно"><i class="fa-solid fa-gift"></i></button>
+                        <button onclick="openAddDaysModal(${u.id})" class="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-xl transition shadow-sm" title="Добавить дни"><i class="fa-solid fa-calendar-plus"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -598,21 +598,21 @@
                             </div>
                             <div class="space-y-4">
                                 <div>
-                                    <div class="flex justify-between text-xs mb-1.5 font-medium text-slate-600 dark:text-slate-400"><span>CPU Load</span><span>${pctCPU}%</span></div>
+                                    <div class="flex justify-between text-xs mb-1.5 font-medium text-slate-600 dark:text-slate-400"><span>Загрузка CPU</span><span>${pctCPU}%</span></div>
                                     <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2"><div class="bg-gradient-to-r from-blue-400 to-indigo-500 h-2 rounded-full transition-all duration-1000" style="width: ${pctCPU}%"></div></div>
                                 </div>
                                 <div>
-                                    <div class="flex justify-between text-xs mb-1.5 font-medium text-slate-600 dark:text-slate-400"><span>RAM Usage</span><span>${pctRAM}%</span></div>
+                                    <div class="flex justify-between text-xs mb-1.5 font-medium text-slate-600 dark:text-slate-400"><span>Использование ОЗУ</span><span>${pctRAM}%</span></div>
                                     <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2"><div class="bg-gradient-to-r from-pink-400 to-rose-500 h-2 rounded-full transition-all duration-1000" style="width: ${pctRAM}%"></div></div>
                                 </div>
                                 <div class="pt-4 mt-2 border-t border-slate-100 dark:border-slate-800/50 flex justify-between text-sm font-medium">
                                     <span class="text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-lg"><i class="fa-solid fa-users mr-1.5"></i>${s.connections||0}</span>
-                                    <span class="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1 rounded-lg"><i class="fa-solid fa-clock mr-1.5"></i>${Math.floor((s.uptime||0)/86400)}d</span>
+                                    <span class="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1 rounded-lg"><i class="fa-solid fa-clock mr-1.5"></i>${Math.floor((s.uptime||0)/86400)}д</span>
                                 </div>
                             </div>
                         </div>`;
                 });
-            } catch(e) { grid.innerHTML = '<p class="text-rose-500 col-span-full">Error connecting to servers API. Check Python console.</p>'; }
+            } catch(e) { grid.innerHTML = '<p class="text-rose-500 col-span-full">Ошибка подключения к API серверов. Проверьте консоль Python.</p>'; }
         }
 
         async function fetchPromos() {
@@ -620,7 +620,7 @@
             let promos = await res.json();
             document.getElementById('promo-table').innerHTML = promos.map(p => {
                 // Красивое отображение типа
-                const badgeText = p.type === 'discount' ? `${p.value}% Discount` : `+${p.value} Days`;
+                const badgeText = p.type === 'discount' ? `Скидка ${p.value}%` : `+${p.value} Дней`;
                 return `<tr class="dark:text-white border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/30"><td class="py-4 px-4 font-mono font-bold text-primary">${p.code}</td><td class="px-4"><span class="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-1 rounded text-xs font-bold">${badgeText}</span></td><td class="text-right px-4 font-medium">${p.uses} / ${p.max}</td></tr>`;
             }).join('');
         }
@@ -632,22 +632,22 @@
                 method: 'POST', headers: getHeaders(),
                 body: JSON.stringify({ code: document.getElementById('promo-code').value, type: typeVal, value: document.getElementById('promo-val').value, max_uses: document.getElementById('promo-max').value })
             });
-            showToast('Promo Created!', 'success'); fetchPromos(); e.target.reset();
+            showToast('Промокод создан!', 'success'); fetchPromos(); e.target.reset();
         }
 
         async function sendBroadcast(e) {
             e.preventDefault();
-            const btn = document.getElementById('btn-broadcast'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Sending...';
+            const btn = document.getElementById('btn-broadcast'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Отправка...';
             try {
                 let res = await fetch(`${API_BASE}/api/admin/broadcast_v2`, {
                     method: 'POST', headers: getHeaders(),
                     body: JSON.stringify({ target: document.getElementById('bc-target').value, text: document.getElementById('bc-text').value })
                 });
                 let data = await res.json();
-                showToast(`Sent to ${data.count} users!`, 'success');
+                showToast(`Отправлено ${data.count} пользователям!`, 'success');
                 e.target.reset();
-            } catch(err) { showToast('Broadcast Error', 'error'); }
-            btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i> Launch Broadcast';
+            } catch(err) { showToast('Ошибка рассылки', 'error'); }
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i> Запустить рассылку';
         }
 
         async function fetchLogs() {
@@ -659,9 +659,9 @@
         }
 
         async function giftUser(id) {
-            if(!confirm(`Gift 24 hours to User ${id}?`)) return;
+            if(!confirm(`Подарить 24 часа пользователю ${id}?`)) return;
             await fetch(`${API_BASE}/api/admin/gift`, { method: 'POST', headers: getHeaders(), body: JSON.stringify({id: id})});
-            showToast('Gift sent!', 'success'); fetchUsers();
+            showToast('Подарок отправлен!', 'success'); fetchUsers();
         }
 
         function openAddDaysModal(id) {
@@ -675,22 +675,22 @@
             if (!days || !selectedUserIdForDays) return;
             try {
                 let res = await fetch(`${API_BASE}/api/admin/add_days`, { method: 'POST', headers: getHeaders(), body: JSON.stringify({ id: selectedUserIdForDays, days: days }) });
-                if((await res.json()).success) { showToast(`Added ${days} days!`, 'success'); closeModal(); fetchUsers(); }
-            } catch(e) { showToast('Error', 'error'); }
+                if((await res.json()).success) { showToast(`Добавлено ${days} дней!`, 'success'); closeModal(); fetchUsers(); }
+            } catch(e) { showToast('Ошибка', 'error'); }
         }
 
         async function generateSubscription(e) {
             e.preventDefault();
-            const btn = document.getElementById('btn-generate'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Generating...';
+            const btn = document.getElementById('btn-generate'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Генерация...';
             try {
                 let res = await fetch(`${API_BASE}/api/admin/generate`, {
                     method: 'POST', headers: getHeaders(),
                     body: JSON.stringify({ tg_id: document.getElementById('gen-user-id').value, devices: document.getElementById('gen-devices').value, months: document.getElementById('gen-months').value })
                 });
-                if((await res.json()).success) { showToast('Sub generated & sent!', 'success'); e.target.reset(); }
-                else showToast('X-UI API Error', 'error');
-            } catch(e) { showToast('Connection Error', 'error'); }
-            btn.innerHTML = '<i class="fa-solid fa-magic mr-2 text-pink-400"></i> Issue & Send';
+                if((await res.json()).success) { showToast('Подписка сгенерирована и отправлена!', 'success'); e.target.reset(); }
+                else showToast('Ошибка X-UI API', 'error');
+            } catch(e) { showToast('Ошибка подключения', 'error'); }
+            btn.innerHTML = '<i class="fa-solid fa-magic mr-2 text-pink-400"></i> Выдать и Отправить';
         }
     </script>
 </body>
