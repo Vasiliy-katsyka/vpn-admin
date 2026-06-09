@@ -111,6 +111,9 @@
                     <button onclick="switchTab('generate')" id="nav-generate" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
                         <i class="fa-solid fa-gift w-5 text-center text-slate-400"></i><span>Выдать подписку</span>
                     </button>
+                    <button onclick="switchTab('prices')" id="nav-prices" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
+                        <i class="fa-solid fa-tags w-5 text-center text-slate-400"></i><span>Цены</span>
+                    </button>
                     <button onclick="switchTab('logs')" id="nav-logs" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
                         <i class="fa-solid fa-list-check w-5 text-center text-slate-400"></i><span>Журнал аудита</span>
                     </button>
@@ -339,6 +342,26 @@
                     </div>
                 </div>
 
+                <!-- PRICES -->
+                <div id="tab-prices" class="hidden fade-in space-y-6">
+                    <div class="bg-white dark:bg-darkSurface p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                        <h3 class="text-xl font-bold dark:text-white mb-6 flex items-center"><i class="fa-solid fa-tags text-primary mr-2"></i> Управление ценами тарифов</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm whitespace-nowrap">
+                                <thead>
+                                    <tr class="text-slate-500 uppercase text-xs border-b dark:border-slate-700">
+                                        <th class="px-4 py-3">Устройства</th>
+                                        <th class="px-4 py-3">Срок подписки</th>
+                                        <th class="px-4 py-3">Цена тарифа (₽)</th>
+                                        <th class="px-4 py-3 text-right">Действие</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="prices-table-body" class="divide-y divide-slate-100 dark:divide-slate-800/50"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </main>
     </div>
@@ -400,6 +423,73 @@
             }
         }
 
+        // FETCH AND UPDATE PLAN PRICES
+        async function fetchPrices() {
+            try {
+                let res = await fetch(`${API_BASE}/api/admin/prices`, { headers: getHeaders() });
+                let prices = await res.json();
+                
+                // Сортировка по устройствам, а затем по месяцам
+                prices.sort((a, b) => {
+                    if (a.devices !== b.devices) return a.devices - b.devices;
+                    return a.months - b.months;
+                });
+
+                document.getElementById('prices-table-body').innerHTML = prices.map(p => {
+                    const devText = p.devices === 0 ? "Безлимит" : `${p.devices} устр.`;
+                    return `
+                        <tr class="dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/30 border-b border-slate-50 dark:border-slate-800/50">
+                            <td class="py-4 px-4 font-bold text-slate-800 dark:text-white">${devText}</td>
+                            <td class="px-4 font-semibold">${p.months} мес.</td>
+                            <td class="px-4">
+                                <input id="price-input-${p.devices}-${p.months}" type="number" value="${p.price}" class="w-24 px-3 py-1.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg text-center dark:text-white text-sm font-bold outline-none">
+                            </td>
+                            <td class="px-4 text-right">
+                                <button onclick="updatePrice(${p.devices}, ${p.months}, this)" class="px-4 py-2 bg-primary hover:bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-sm transition">
+                                    Сохранить
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch(e) {
+                showToast('Ошибка при загрузке цен', 'error');
+            }
+        }
+
+        async function updatePrice(devices, months, btn) {
+            const inputVal = document.getElementById(`price-input-${devices}-${months}`).value;
+            const newPrice = parseInt(inputVal);
+            if (!newPrice || newPrice <= 0) {
+                showToast('Введите корректную цену', 'error');
+                return;
+            }
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Сохранение...';
+            btn.disabled = true;
+
+            try {
+                let res = await fetch(`${API_BASE}/api/admin/update_price`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ devices, months, price: newPrice })
+                });
+                let data = await res.json();
+                if (data.success) {
+                    showToast('Цена успешно обновлена в коде, боте и на Lava!', 'success');
+                    fetchPrices();
+                } else {
+                    showToast(data.error || 'Ошибка при обновлении цены', 'error');
+                }
+            } catch(e) {
+                showToast('Ошибка сети при отправке новой цены', 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
         function logout() {
             sessionStorage.removeItem('admin_user');
             document.getElementById('login-user').value = '';
@@ -446,7 +536,7 @@
         }
 
         function switchTab(tabId) {
-            ['dashboard', 'users', 'servers', 'promos', 'broadcast', 'logs', 'generate'].forEach(t => {
+            ['dashboard', 'users', 'servers', 'promos', 'broadcast', 'logs', 'generate', 'prices'].forEach(t => {
                 const el = document.getElementById(`tab-${t}`);
                 if(el) el.classList.add('hidden');
                 const nav = document.getElementById(`nav-${t}`);
@@ -456,7 +546,7 @@
             const navBtn = document.getElementById(`nav-${tabId}`);
             navBtn.classList.add('active'); navBtn.querySelector('i').classList.add('text-white');
             
-            const titles = { dashboard: 'Обзор панели управления', users: 'Управление пользователями', servers: 'Состояние серверов', promos: 'Промокоды', broadcast: 'Система рассылок', logs: 'Системные журналы', generate: 'Выдача подписки'};
+            const titles = { dashboard: 'Обзор панели управления', users: 'Управление пользователями', servers: 'Состояние серверов', promos: 'Промокоды', broadcast: 'Система рассылок', logs: 'Системные журналы', generate: 'Выдача подписки', prices: 'Управление ценами'};
             document.getElementById('page-title').innerText = titles[tabId] || 'Панель';
             
             if(window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) toggleSidebar();
@@ -465,6 +555,7 @@
             if(tabId === 'promos') fetchPromos();
             if(tabId === 'logs') fetchLogs();
             if(tabId === 'dashboard') fetchCharts();
+            if(tabId === 'prices') fetchPrices();
         }
 
         function downloadBackup() { window.open(`${API_BASE}/api/admin/backup?auth=${ADMIN_TOKEN}`, '_blank'); }
