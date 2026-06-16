@@ -26,6 +26,23 @@
         }
     </script>
     <style>
+        /* Перенос базового фона на уровень HTML, чтобы псевдоэлементы body не прятались под ним */
+        html, :root {
+            background-color: #f1f5f9 !important;
+            transition: background-color 0.3s ease;
+        }
+        .dark, .dark html, .dark :root {
+            background-color: #070a13 !important;
+        }
+    
+        /* Делаем body и main прозрачными, чтобы проявить фоновые сферы */
+        body {
+            background-color: transparent !important;
+        }
+        main {
+            background-color: transparent !important;
+        }
+    
         /* Мягкие анимированные сферы на фоне (Backdrop Spheres) */
         body::before {
             content: '';
@@ -35,8 +52,8 @@
             width: 45vw;
             height: 45vw;
             border-radius: 50%;
-            background: rgba(59, 130, 246, 0.12); /* Мягкий синий */
-            filter: blur(100px);
+            background: rgba(99, 102, 241, 0.2); /* Сбалансированный индиго-синий */
+            filter: blur(120px);
             z-index: -1;
             pointer-events: none;
             animation: float-slow 12s infinite alternate ease-in-out;
@@ -49,8 +66,8 @@
             width: 45vw;
             height: 45vw;
             border-radius: 50%;
-            background: rgba(139, 92, 246, 0.1); /* Мягкий пурпурный */
-            filter: blur(100px);
+            background: rgba(236, 72, 153, 0.16); /* Сбалансированный пурпурный */
+            filter: blur(120px);
             z-index: -1;
             pointer-events: none;
             animation: float-slow-reverse 15s infinite alternate ease-in-out;
@@ -65,49 +82,40 @@
             100% { transform: translate(-4vw, -4vh) scale(1); }
         }
     
-        /* Базовый фон страницы */
-        body {
-            background-color: #f1f5f9 !important;
-            transition: background-color 0.3s ease;
-        }
-        .dark body {
-            background-color: #090d16 !important;
-        }
-    
-        /* Скроллбар */
+        /* Базовые стили прокрутки */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.2); border-radius: 10px; }
         .dark ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); }
     
-        /* Чистый плоский Glassmorphic для карточек (Без свечений) */
+        /* Чистый Glassmorphic для карточек */
         .bg-white, .bg-darkSurface {
             background: rgba(255, 255, 255, 0.45) !important;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.4) !important;
-            box-shadow: none !important; /* Убрано свечение */
+            box-shadow: none !important;
             border-radius: 1.5rem !important;
         }
         .dark .bg-white, .dark .bg-darkSurface, .dark .dark\:bg-darkSurface {
             background: rgba(15, 23, 42, 0.45) !important;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.04) !important;
-            box-shadow: none !important; /* Убрано свечение */
+            box-shadow: none !important;
         }
     
         /* Сайдбар */
         aside#sidebar {
             background: rgba(255, 255, 255, 0.3) !important;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
         }
         .dark aside#sidebar {
             background: rgba(15, 23, 42, 0.35) !important;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-right: 1px solid rgba(255, 255, 255, 0.02) !important;
         }
     
@@ -156,24 +164,24 @@
         input:focus, select:focus, textarea:focus {
             border-color: #6366f1 !important;
             background: rgba(255, 255, 255, 0.5) !important;
-            box-shadow: none !important; /* Без свечений полей */
+            box-shadow: none !important;
         }
         .dark input:focus, .dark select:focus, .dark textarea:focus {
             background: rgba(15, 23, 42, 0.4) !important;
         }
     
-        /* Строгий активный пункт меню (Снято свечение shadow) */
+        /* Строгий активный пункт меню */
         .nav-item.active {
             background: rgba(99, 102, 241, 0.08) !important;
             color: #6366f1 !important;
             border: 1px solid rgba(99, 102, 241, 0.2) !important;
-            box-shadow: none !important; /* Убрано */
+            box-shadow: none !important;
         }
         .dark .nav-item.active {
             color: #a5b4fc !important;
             background: rgba(99, 102, 241, 0.12) !important;
             border: 1px solid rgba(99, 102, 241, 0.25) !important;
-            box-shadow: none !important; /* Убрано */
+            box-shadow: none !important;
         }
         .nav-item.active i { color: #6366f1 !important; }
         .dark .nav-item.active i { color: #a5b4fc !important; }
@@ -186,7 +194,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.02) !important;
         }
     
-        /* Кнопки (Сброс теней свечения на всех кнопках) */
+        /* Кнопки */
         button {
             box-shadow: none !important;
         }
