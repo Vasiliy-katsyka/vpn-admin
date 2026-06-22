@@ -459,15 +459,17 @@
                             <form onsubmit="createPromo(event)" class="space-y-4">
                                 <div><label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Кодовое слово</label><input id="promo-code" required class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white" placeholder="SUMMER24"></div>
                                 
-                                <div>
-                                    <label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Тип вознаграждения</label>
-                                    <select id="promo-type" class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white outline-none">
-                                        <option value="days">Добавить бесплатные дни</option>
-                                        <option value="discount">Скидка (%)</option>
-                                    </select>
+                                <!-- SEARCH FOR AND REPLACE THIS SECTION IN YOUR HTML FORM -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Бонусные дни</label>
+                                        <input id="promo-days" type="number" class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white outline-none" value="0">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Скидка (%)</label>
+                                        <input id="promo-discount" type="number" class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white outline-none" value="0">
+                                    </div>
                                 </div>
-                            
-                                <div><label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Размер вознаграждения</label><input id="promo-val" type="number" required class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white" value="7"></div>
                                 <div><label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Максимум использований</label><input id="promo-max" type="number" required class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white" value="100"></div>
                                 <button class="w-full bg-primary hover:bg-indigo-600 text-white py-3 rounded-xl font-bold transition shadow-lg hover:-translate-y-0.5">Создать код</button>
                             </form>
@@ -1330,23 +1332,62 @@
             } catch(e) { grid.innerHTML = '<p class="text-rose-500 col-span-full">Ошибка подключения к API серверов.</p>'; }
         }
 
+        // --- REPLACE THIS FUNCTION IN YOUR SCRIPT TAG ---
         async function fetchPromos() {
-            let res = await fetch(`${API_BASE}/api/admin/promocodes`, { headers: getHeaders() });
-            let promos = await res.json();
-            document.getElementById('promo-table').innerHTML = promos.map(p => {
-                const badgeText = p.type === 'discount' ? `Скидка ${p.value}%` : `+${p.value} Дней`;
-                return `<tr class="dark:text-white border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/30"><td class="py-4 px-4 font-mono font-bold text-primary">${p.code}</td><td class="px-4"><span class="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2 py-1 rounded text-xs font-bold">${badgeText}</span></td><td class="text-right px-4 font-medium">${p.uses} / ${p.max}</td></tr>`;
-            }).join('');
+            try {
+                let res = await fetch(`${API_BASE}/api/admin/promocodes`, { headers: getHeaders() });
+                let promos = await res.json();
+                
+                document.getElementById('promo-table').innerHTML = promos.map(p => {
+                    let rewards = [];
+                    if (p.reward_days > 0) rewards.push(`+${p.reward_days} Дней`);
+                    if (p.reward_discount > 0) rewards.push(`Скидка ${p.reward_discount}%`);
+                    
+                    const badgeText = rewards.join(' & ') || 'Без наград';
+                    
+                    return `
+                        <tr class="dark:text-white border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/30">
+                            <td class="py-4 px-4 font-mono font-bold text-primary">${p.code}</td>
+                            <td class="px-4">
+                                <span class="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2.5 py-1 rounded text-xs font-bold">${badgeText}</span>
+                            </td>
+                            <td class="text-right px-4 font-medium">${p.uses} / ${p.max}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error("Ошибка загрузки промокодов:", e);
+            }
         }
         
+        // --- REPLACE THIS FUNCTION IN YOUR SCRIPT TAG ---
         async function createPromo(e) {
             e.preventDefault();
-            const typeVal = document.getElementById('promo-type').value;
-            await fetch(`${API_BASE}/api/admin/promocodes`, {
-                method: 'POST', headers: getHeaders(),
-                body: JSON.stringify({ code: document.getElementById('promo-code').value, type: typeVal, value: document.getElementById('promo-val').value, max_uses: document.getElementById('promo-max').value })
-            });
-            showToast('Промокод создан!', 'success'); fetchPromos(); e.target.reset();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Создание...';
+            btn.disabled = true;
+        
+            try {
+                await fetch(`${API_BASE}/api/admin/promocodes`, {
+                    method: 'POST', 
+                    headers: getHeaders(),
+                    body: JSON.stringify({ 
+                        code: document.getElementById('promo-code').value, 
+                        reward_days: parseInt(document.getElementById('promo-days').value) || 0, 
+                        reward_discount: parseInt(document.getElementById('promo-discount').value) || 0, 
+                        max_uses: parseInt(document.getElementById('promo-max').value) || 100 
+                    })
+                });
+                showToast('Промокод успешно создан!', 'success'); 
+                fetchPromos(); 
+                e.target.reset();
+            } catch(err) {
+                showToast('Ошибка при создании промокода', 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
         async function sendBroadcast(e) {
