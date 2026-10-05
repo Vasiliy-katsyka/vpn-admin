@@ -6,576 +6,483 @@
     <title>Compact VPN - Панель администратора</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <!-- Зависимости для интерактивного 3D-глобуса -->
     <script src="https://unpkg.com/three"></script>
     <script src="https://unpkg.com/globe.gl"></script>
-    
+
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: { 
-                extend: { 
-                    fontFamily: { sans: ['Inter', 'sans-serif'] }, 
-                    colors: { 
-                        primary: '#6366f1', 
-                        secondary: '#ec4899', 
-                        dark: '#070a13',         
-                        darkSurface: '#0f172a'   
-                    } 
-                } 
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    colors: { primary: '#6366f1' }
+                }
             }
         }
     </script>
+    <style type="text/tailwindcss">
+        @layer base {
+            html { @apply bg-zinc-50 antialiased; }
+            html.dark { @apply bg-zinc-950; }
+            body { @apply bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 text-sm; font-feature-settings: "cv11", "ss01"; }
+        }
+        @layer components {
+            /* Карточки */
+            .card { @apply bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl; }
+            .card-header { @apply flex items-center justify-between gap-3 px-5 py-3.5 border-b border-zinc-100 dark:border-zinc-800; }
+            .card-title { @apply text-sm font-semibold text-zinc-900 dark:text-zinc-100; }
+            .card-subtitle { @apply text-xs text-zinc-500 dark:text-zinc-400; }
+            .muted { @apply text-zinc-500 dark:text-zinc-400; }
+
+            /* Поля ввода */
+            .label { @apply block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5; }
+            .input { @apply w-full h-9 px-3 text-sm rounded-lg bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15; }
+            textarea.input { @apply h-auto py-2.5 leading-relaxed; }
+
+            /* Кнопки */
+            .btn { @apply inline-flex items-center justify-center gap-2 h-9 px-3.5 text-sm font-medium rounded-lg transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed; }
+            .btn-sm { @apply h-8 px-3 text-xs; }
+            .btn-primary { @apply bg-indigo-600 text-white hover:bg-indigo-500; }
+            .btn-secondary { @apply bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800; }
+            .btn-danger { @apply bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10; }
+            .btn-icon { @apply inline-flex items-center justify-center w-8 h-8 rounded-lg text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors; }
+
+            /* Статусы */
+            .badge { @apply inline-flex items-center gap-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-300; }
+            .dot { @apply inline-block w-1.5 h-1.5 rounded-full shrink-0; }
+            .chip { @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300; }
+
+            /* Таблицы */
+            .data-table { @apply w-full text-left text-sm whitespace-nowrap; }
+            .data-table thead th { @apply px-5 py-2.5 text-xs font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-50/60 dark:bg-zinc-900 border-b border-zinc-100 dark:border-zinc-800; }
+            .data-table tbody tr { @apply border-b border-zinc-100 dark:border-zinc-800/70 last:border-0; }
+            .data-table tbody td { @apply px-5 py-3; }
+            .data-table tbody tr.row-hover:hover { @apply bg-zinc-50 dark:bg-zinc-800/40; }
+
+            /* Навигация */
+            .nav-section { @apply px-3 pt-5 pb-1.5 text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500; }
+            .nav-item { @apply w-full flex items-center gap-3 h-9 px-3 rounded-lg text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/70 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors; }
+            .nav-item i { @apply w-4 text-center text-[13px] text-zinc-400 dark:text-zinc-500; }
+            .nav-item.active { @apply bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-medium; }
+            .nav-item.active i { @apply text-indigo-600 dark:text-indigo-400; }
+
+            /* Прогресс-бар */
+            .bar { @apply w-full h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden; }
+            .bar > div { @apply h-full rounded-full transition-all duration-700; }
+        }
+        @layer utilities {
+            .tabular { font-variant-numeric: tabular-nums; }
+        }
+    </style>
     <style>
-        /* Перенос базового фона на уровень HTML, чтобы псевдоэлементы body не прятались под ним */
-        html, :root {
-            background-color: #f1f5f9 !important;
-            transition: background-color 0.3s ease;
-        }
-        .dark, .dark html, .dark :root {
-            background-color: #070a13 !important;
-        }
-
-        /* Делаем body и main прозрачными, чтобы проявить фоновые сферы */
-        body {
-            background-color: transparent !important;
-        }
-        main {
-            background-color: transparent !important;
-        }
-
-        /* Мягкие анимированные сферы на фоне (Backdrop Spheres) */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0%;
-            left: -10%;
-            width: 45vw;
-            height: 45vw;
-            border-radius: 50%;
-            background: rgba(99, 102, 241, 0.2); 
-            filter: blur(120px);
-            z-index: -1;
-            pointer-events: none;
-            animation: float-slow 12s infinite alternate ease-in-out;
-        }
-        body::after {
-            content: '';
-            position: fixed;
-            bottom: -5%;
-            right: -10%;
-            width: 45vw;
-            height: 45vw;
-            border-radius: 50%;
-            background: rgba(236, 72, 153, 0.16); 
-            filter: blur(120px);
-            z-index: -1;
-            pointer-events: none;
-            animation: float-slow-reverse 15s infinite alternate ease-in-out;
-        }
-
-        @keyframes float-slow {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(4vw, 4vh) scale(1.1); }
-        }
-        @keyframes float-slow-reverse {
-            0% { transform: translate(0, 0) scale(1.1); }
-            100% { transform: translate(-4vw, -4vh) scale(1); }
-        }
-
-        /* Базовые стили прокрутки */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.2); border-radius: 10px; }
-        .dark ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+        .dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border: 2px solid transparent; background-clip: padding-box; }
 
-        /* Чистый Glassmorphic для карточек */
-        .bg-white, .bg-darkSurface {
-            background: rgba(255, 255, 255, 0.45) !important;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.4) !important;
-            box-shadow: none !important;
-            border-radius: 1.5rem !important;
-        }
-        .dark .bg-white, .dark .bg-darkSurface, .dark .dark\:bg-darkSurface {
-            background: rgba(15, 23, 42, 0.45) !important;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.04) !important;
-            box-shadow: none !important;
-        }
+        .fade-in { animation: fadeIn 0.18s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Сайдбар */
-        aside#sidebar {
-            background: rgba(255, 255, 255, 0.3) !important;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
-        }
-        .dark aside#sidebar {
-            background: rgba(15, 23, 42, 0.35) !important;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(255, 255, 255, 0.02) !important;
-        }
+        .skeleton { display: inline-block; min-width: 4rem; background: rgba(0,0,0,0.06); border-radius: 0.375rem; color: transparent !important; animation: pulse-soft 1.6s ease-in-out infinite; }
+        .dark .skeleton { background: rgba(255,255,255,0.06); }
+        @keyframes pulse-soft { 50% { opacity: 0.5; } }
 
-        /* Шапка */
-        header {
-            background: rgba(255, 255, 255, 0.2) !important;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.04) !important;
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; }
         }
-        .dark header {
-            background: rgba(15, 23, 42, 0.2) !important;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.02) !important;
-        }
-
-        /* Модальные окна */
-        .glass-panel, #login-screen > div, #add-days-modal > div {
-            background: rgba(255, 255, 255, 0.5) !important;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.5) !important;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02) !important;
-        }
-        .dark .glass-panel, .dark #login-screen > div, .dark #add-days-modal > div {
-            background: rgba(15, 23, 42, 0.5) !important;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.05) !important;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2) !important;
-        }
-
-        /* Поля ввода (Инпуты) */
-        input, select, textarea {
-            background: rgba(255, 255, 255, 0.3) !important;
-            border: 1px solid rgba(0, 0, 0, 0.06) !important;
-            backdrop-filter: blur(4px);
-            transition: border-color 0.2s ease, background 0.2s ease !important;
-        }
-        .dark input, .dark select, .dark textarea {
-            background: rgba(15, 23, 42, 0.25) !important;
-            border: 1px solid rgba(255, 255, 255, 0.05) !important;
-            color: #f1f5f9 !important;
-        }
-        input:focus, select:focus, textarea:focus {
-            border-color: #6366f1 !important;
-            background: rgba(255, 255, 255, 0.5) !important;
-            box-shadow: none !important;
-        }
-        .dark input:focus, .dark select:focus, .dark textarea:focus {
-            background: rgba(15, 23, 42, 0.4) !important;
-        }
-
-        /* Строгий активный пункт меню */
-        .nav-item.active {
-            background: rgba(99, 102, 241, 0.08) !important;
-            color: #6366f1 !important;
-            border: 1px solid rgba(99, 102, 241, 0.2) !important;
-            box-shadow: none !important;
-        }
-        .dark .nav-item.active {
-            color: #a5b4fc !important;
-            background: rgba(99, 102, 241, 0.12) !important;
-            border: 1px solid rgba(99, 102, 241, 0.25) !important;
-            box-shadow: none !important;
-        }
-        .nav-item.active i { color: #6366f1 !important; }
-        .dark .nav-item.active i { color: #a5b4fc !important; }
-
-        /* Таблицы */
-        tr {
-            border-bottom: 1px solid rgba(0, 0, 0, 0.03) !important;
-        }
-        .dark tr {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.02) !important;
-        }
-
-        /* Кнопки */
-        button {
-            box-shadow: none !important;
-        }
-
-        /* Анимации */
-        .fade-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-        .skeleton { background: linear-gradient(90deg, rgba(0,0,0,0.03) 25%, rgba(0,0,0,0.06) 50%, rgba(0,0,0,0.03) 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 0.5rem; color: transparent !important; pointer-events: none;}
-        .dark .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.01) 25%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.01) 75%); background-size: 200% 100%; }
-        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-dark text-slate-800 dark:text-slate-200 h-screen overflow-hidden transition-colors duration-300 font-sans">
+<body class="h-screen overflow-hidden font-sans">
 
     <!-- КЛИ-КОНСОЛЬ В СТИЛЕ QUAKE -->
-    <div id="cli-console" class="fixed top-0 left-0 w-full h-[320px] bg-slate-950/90 dark:bg-black/90 backdrop-blur-md border-b-2 border-indigo-500 z-[999] transform -translate-y-full transition-transform duration-300 flex flex-col justify-between font-mono p-4 text-emerald-400">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-2 text-xs text-slate-400">
-            <span><i class="fa-solid fa-terminal mr-2 animate-pulse text-emerald-500"></i>COMPACT VPN - SECURE ADMIN CLI TERMINAL v1.0</span>
-            <span>Нажмите <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300 font-sans text-[10px]">~</kbd> или <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300 font-sans text-[10px]">Ё</kbd> для закрытия</span>
+    <div id="cli-console" class="fixed top-0 left-0 w-full h-[320px] bg-zinc-950/95 backdrop-blur border-b border-zinc-800 z-[999] transform -translate-y-full transition-transform duration-200 flex flex-col font-mono p-4 text-zinc-300">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-2 mb-2 text-xs text-zinc-500">
+            <span><i class="fa-solid fa-terminal mr-2"></i>Compact VPN · admin CLI</span>
+            <span class="hidden sm:inline">Нажмите <kbd class="px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-zinc-300 font-sans text-[10px]">~</kbd> или <kbd class="px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-zinc-300 font-sans text-[10px]">Ё</kbd> для закрытия</span>
         </div>
         <!-- Логи терминала -->
-        <div id="cli-logs" class="flex-1 overflow-y-auto custom-scrollbar text-sm space-y-1 pr-2 mb-2 select-text">
-            <div class="text-slate-500">Система готова. Введите "help" для вывода списка команд.</div>
+        <div id="cli-logs" class="flex-1 overflow-y-auto text-[13px] space-y-1 pr-2 mb-2 select-text">
+            <div class="text-zinc-500">Система готова. Введите "help" для вывода списка команд.</div>
         </div>
         <!-- Поле ввода команды -->
-        <form onsubmit="handleCliCommand(event)" class="flex items-center border-t border-slate-800 pt-3">
-            <span class="text-indigo-400 font-bold mr-2">&gt;</span>
-            <input id="cli-input" type="text" autocomplete="off" placeholder="Введите команду здесь..." class="flex-1 bg-transparent border-none outline-none focus:ring-0 text-emerald-400 font-mono text-sm p-0 m-0">
+        <form onsubmit="handleCliCommand(event)" class="flex items-center border-t border-zinc-800 pt-3">
+            <span class="text-indigo-400 mr-2">&gt;</span>
+            <input id="cli-input" type="text" autocomplete="off" placeholder="Введите команду..." class="flex-1 bg-transparent border-none outline-none focus:ring-0 text-zinc-100 placeholder:text-zinc-600 font-mono text-[13px] p-0 m-0">
         </form>
     </div>
 
     <!-- LOGIN SCREEN -->
-    <div id="login-screen" class="fixed inset-0 z-[100] bg-gradient-to-br from-indigo-100 to-pink-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center transition-opacity duration-500">
-        <div class="glass-panel p-8 rounded-3xl shadow-2xl w-96 max-w-[90%] transform scale-100 transition-transform">
-            <div class="text-center mb-8">
-                <div class="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg text-white text-2xl">
+    <div id="login-screen" class="fixed inset-0 z-[100] bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4 transition-opacity duration-300">
+        <div class="w-full max-w-sm">
+            <div class="flex flex-col items-center text-center mb-6">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center mb-4">
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-800 dark:text-white">Доступ администратора</h2>
-                <p class="text-sm text-slate-500 mt-1">Пожалуйста, введите ваши учетные данные</p>
+                <h2 class="text-lg font-semibold">Вход в панель</h2>
+                <p class="text-sm muted mt-1">Compact VPN · администрирование</p>
             </div>
-            <form onsubmit="performLogin(event)" class="space-y-4">
+            <form onsubmit="performLogin(event)" class="card p-6 space-y-4">
                 <div>
-                    <div class="relative">
-                        <i class="fa-solid fa-user absolute left-4 top-3.5 text-slate-400"></i>
-                        <input id="login-user" type="text" required placeholder="@username" class="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary outline-none transition dark:text-white">
-                    </div>
+                    <label for="login-user" class="label">Имя пользователя</label>
+                    <input id="login-user" type="text" required placeholder="@username" autocomplete="username" class="input">
                 </div>
                 <div>
-                    <div class="relative">
-                        <i class="fa-solid fa-lock absolute left-4 top-3.5 text-slate-400"></i>
-                        <input id="login-pass" type="password" required placeholder="Пароль" class="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary outline-none transition dark:text-white">
-                    </div>
+                    <label for="login-pass" class="label">Пароль</label>
+                    <input id="login-pass" type="password" required placeholder="••••••••" autocomplete="current-password" class="input">
                 </div>
-                <button type="submit" class="w-full bg-gradient-to-r from-primary to-indigo-600 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-indigo-500/30 transition-all transform hover:-translate-y-0.5 mt-2">
-                    Войти
-                </button>
+                <button type="submit" class="btn btn-primary w-full">Войти</button>
             </form>
         </div>
     </div>
 
     <!-- MAIN DASHBOARD -->
-    <div id="app-container" class="flex h-full w-full hidden opacity-0 transition-opacity duration-500">
-        
+    <div id="app-container" class="flex h-full w-full hidden opacity-0 transition-opacity duration-300">
+
         <!-- Mobile Sidebar Backdrop -->
-        <div id="sidebar-backdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden transition-opacity"></div>
+        <div id="sidebar-backdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-zinc-950/40 z-40 hidden transition-opacity"></div>
 
         <!-- Sidebar -->
-        <aside id="sidebar" class="fixed md:static inset-y-0 left-0 w-66 bg-white dark:bg-darkSurface shadow-2xl md:shadow-xl flex flex-col justify-between z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 border-r border-slate-100 dark:border-slate-800">
+        <aside id="sidebar" class="fixed md:static inset-y-0 left-0 w-60 shrink-0 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col justify-between z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-200">
             <div class="overflow-y-auto">
-                <div class="h-20 flex items-center justify-between px-6 border-b border-slate-100 dark:border-slate-800">
-                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary flex items-center">
-                        <i class="fa-solid fa-shield-halved mr-2 text-primary"></i>Compact VPN
-                    </h1>
-                    <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+                <div class="h-14 flex items-center justify-between px-4 border-b border-zinc-100 dark:border-zinc-800">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-shield-halved"></i></div>
+                        <span class="font-semibold text-[15px]">Compact VPN</span>
+                    </div>
+                    <button onclick="toggleSidebar()" class="md:hidden btn-icon"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                <nav class="p-4 space-y-1 mt-2 text-sm">
-                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
-                        <i class="fa-solid fa-chart-pie w-5 text-center text-slate-400"></i><span>Обзор</span>
-                    </button>
-                    <button onclick="switchTab('users')" id="nav-users" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
-                        <i class="fa-solid fa-users w-5 text-center text-slate-400"></i><span>Пользователи</span>
-                    </button>
-                    <button onclick="switchTab('servers')" id="nav-servers" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
-                        <i class="fa-solid fa-server w-5 text-center text-slate-400"></i><span>Состояние серверов</span>
-                    </button>
-                    <button onclick="switchTab('promos')" id="nav-promos" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
-                        <i class="fa-solid fa-ticket w-5 text-center text-slate-400"></i><span>Промокоды</span>
-                    </button>
-                    <button onclick="switchTab('broadcast')" id="nav-broadcast" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
-                        <i class="fa-solid fa-bullhorn w-5 text-center text-slate-400"></i><span>Рассылка</span>
-                    </button>
-                    <button onclick="switchTab('generate')" id="nav-generate" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
-                        <i class="fa-solid fa-gift w-5 text-center text-slate-400"></i><span>Выдать подписку</span>
-                    </button>
-                    <button onclick="switchTab('prices')" id="nav-prices" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
-                        <i class="fa-solid fa-tags w-5 text-center text-slate-400"></i><span>Цены</span>
-                    </button>
-                    <button onclick="switchTab('logs')" id="nav-logs" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
-                        <i class="fa-solid fa-list-check w-5 text-center text-slate-400"></i><span>Журнал аудита</span>
-                    </button>
+                <nav class="px-3 pb-4">
+                    <div class="nav-section">Основное</div>
+                    <div class="space-y-0.5">
+                        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active"><i class="fa-solid fa-chart-simple"></i><span>Обзор</span></button>
+                        <button onclick="switchTab('users')" id="nav-users" class="nav-item"><i class="fa-solid fa-users"></i><span>Пользователи</span></button>
+                        <button onclick="switchTab('servers')" id="nav-servers" class="nav-item"><i class="fa-solid fa-server"></i><span>Серверы</span></button>
+                    </div>
+                    <div class="nav-section">Продажи</div>
+                    <div class="space-y-0.5">
+                        <button onclick="switchTab('generate')" id="nav-generate" class="nav-item"><i class="fa-solid fa-gift"></i><span>Выдать подписку</span></button>
+                        <button onclick="switchTab('promos')" id="nav-promos" class="nav-item"><i class="fa-solid fa-ticket"></i><span>Промокоды</span></button>
+                        <button onclick="switchTab('prices')" id="nav-prices" class="nav-item"><i class="fa-solid fa-tags"></i><span>Цены</span></button>
+                    </div>
+                    <div class="nav-section">Система</div>
+                    <div class="space-y-0.5">
+                        <button onclick="switchTab('broadcast')" id="nav-broadcast" class="nav-item"><i class="fa-solid fa-paper-plane"></i><span>Рассылка</span></button>
+                        <button onclick="switchTab('logs')" id="nav-logs" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Журнал аудита</span></button>
+                    </div>
                 </nav>
             </div>
-            <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
-                <div class="flex items-center justify-between px-2 py-1">
-                    <div class="flex items-center space-x-3">
-                        <img src="https://ui-avatars.com/api/?name=A&background=6366f1&color=fff" class="w-10 h-10 rounded-full shadow-md border-2 border-white dark:border-slate-700">
-                        <div>
-                            <p id="admin-name" class="text-sm font-bold text-slate-800 dark:text-slate-200">@admin</p>
-                            <p class="text-xs text-green-500 font-medium flex items-center"><span class="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span>В сети</p>
+            <div class="p-3 border-t border-zinc-100 dark:border-zinc-800">
+                <div class="flex items-center justify-between gap-2 px-1">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 flex items-center justify-center text-xs font-semibold shrink-0">A</div>
+                        <div class="min-w-0">
+                            <p id="admin-name" class="text-sm font-medium truncate">@admin</p>
+                            <p class="text-xs muted">Администратор</p>
                         </div>
                     </div>
-                    <button onclick="logout()" class="text-slate-400 hover:text-red-500 transition"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+                    <button onclick="logout()" class="btn-icon" title="Выйти"><i class="fa-solid fa-arrow-right-from-bracket text-xs"></i></button>
                 </div>
             </div>
         </aside>
 
         <!-- Main Body -->
-        <main class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50 dark:bg-dark relative">
-            <!-- Mobile Header & Topbar -->
-            <header class="h-16 md:h-20 flex items-center justify-between px-4 md:px-8 bg-white/80 dark:bg-darkSurface/80 backdrop-blur-md shadow-sm z-10 border-b border-slate-100 dark:border-slate-800">
-                <div class="flex items-center">
-                    <button onclick="toggleSidebar()" class="md:hidden mr-4 text-slate-600 dark:text-slate-300 text-xl p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"><i class="fa-solid fa-bars"></i></button>
-                    <h2 id="page-title" class="text-xl md:text-2xl font-bold text-slate-800 dark:text-white truncate">Обзор панели управления</h2>
+        <main class="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
+            <!-- Topbar -->
+            <header class="h-14 shrink-0 flex items-center justify-between px-4 md:px-6 bg-white/80 dark:bg-zinc-950/80 backdrop-blur border-b border-zinc-200 dark:border-zinc-800 z-10">
+                <div class="flex items-center min-w-0">
+                    <button onclick="toggleSidebar()" class="md:hidden btn-icon mr-2 -ml-1"><i class="fa-solid fa-bars"></i></button>
+                    <h2 id="page-title" class="text-[15px] font-semibold truncate">Обзор</h2>
                 </div>
-                <div class="flex items-center space-x-2 md:space-x-4">
-                    <button onclick="downloadBackup()" class="hidden md:flex px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-medium transition shadow-lg items-center">
-                        <i class="fa-solid fa-database mr-2"></i> Бэкап БД
+                <div class="flex items-center gap-1.5">
+                    <button onclick="downloadBackup()" class="hidden md:inline-flex btn btn-secondary btn-sm">
+                        <i class="fa-solid fa-download text-zinc-400"></i> Бэкап БД
                     </button>
-                    <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 transition flex items-center justify-center">
-                        <i id="theme-icon" class="fa-solid fa-moon"></i>
+                    <button onclick="toggleDarkMode()" class="btn-icon" title="Сменить тему">
+                        <i id="theme-icon" class="fa-solid fa-moon text-[13px]"></i>
                     </button>
                 </div>
             </header>
 
             <!-- Content Area -->
-            <div class="flex-1 overflow-y-auto p-4 md:p-8 pb-20 md:pb-8" id="content-area">
-                
+            <div class="flex-1 overflow-y-auto" id="content-area">
+              <div class="max-w-6xl mx-auto p-4 md:p-6 pb-20 md:pb-10">
+
                 <!-- DASHBOARD -->
-                <div id="tab-dashboard" class="fade-in space-y-6">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                        <div class="bg-white dark:bg-darkSurface p-5 md:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                            <div>
-                                <p class="text-sm text-slate-500 font-medium mb-1">Всего пользователей</p>
-                                <h3 class="text-3xl font-bold dark:text-white skeleton" id="stat-total-users">000</h3>
+                <div id="tab-dashboard" class="fade-in space-y-4 md:space-y-5">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4">
+                        <div class="card p-4 md:p-5">
+                            <div class="flex items-center justify-between">
+                                <p class="text-xs font-medium muted">Всего пользователей</p>
+                                <i class="fa-solid fa-users text-xs text-zinc-300 dark:text-zinc-600 hidden sm:inline-block"></i>
                             </div>
-                            <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/50 text-indigo-500 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-users"></i></div>
+                            <h3 class="mt-2 text-2xl font-semibold tabular tracking-tight skeleton" id="stat-total-users">000</h3>
                         </div>
-                        <div class="bg-white dark:bg-darkSurface p-5 md:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                            <div>
-                                <p class="text-sm text-slate-500 font-medium mb-1">Активные подписки</p>
-                                <h3 class="text-3xl font-bold dark:text-white skeleton" id="stat-active-subs">000</h3>
+                        <div class="card p-4 md:p-5">
+                            <div class="flex items-center justify-between">
+                                <p class="text-xs font-medium muted">Активные подписки</p>
+                                <i class="fa-solid fa-circle-check text-xs text-zinc-300 dark:text-zinc-600 hidden sm:inline-block"></i>
                             </div>
-                            <div class="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/50 text-emerald-500 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-check-circle"></i></div>
+                            <h3 class="mt-2 text-2xl font-semibold tabular tracking-tight skeleton" id="stat-active-subs">000</h3>
                         </div>
-                        <div class="bg-white dark:bg-darkSurface p-5 md:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between sm:col-span-2 lg:col-span-1">
-                            <div>
-                                <p class="text-sm text-slate-500 font-medium mb-1">Примерный доход</p>
-                                <h3 class="text-3xl font-bold dark:text-white skeleton" id="stat-revenue">000</h3>
+                        <div class="card p-4 md:p-5 col-span-2 sm:col-span-1">
+                            <div class="flex items-center justify-between">
+                                <p class="text-xs font-medium muted">Примерный доход</p>
+                                <i class="fa-solid fa-ruble-sign text-xs text-zinc-300 dark:text-zinc-600 hidden sm:inline-block"></i>
                             </div>
-                            <div class="w-12 h-12 bg-amber-50 dark:bg-amber-900/50 text-amber-500 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-ruble-sign"></i></div>
+                            <h3 class="mt-2 text-2xl font-semibold tabular tracking-tight skeleton" id="stat-revenue">000</h3>
                         </div>
                     </div>
-                    
-                    <!-- 3D ГЛОБУС КАРТА СЕТИ -->
-                    <div id="dashboard-globe-card" class="bg-white dark:bg-darkSurface p-5 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center relative overflow-hidden h-[380px]">
-                        <h3 class="font-bold text-lg mb-2 dark:text-white absolute top-5 left-5 z-10"><i class="fa-solid fa-earth-americas mr-2 text-primary"></i>География узлов связи (3D)</h3>
-                        <div id="3d-globe" class="w-full h-full flex items-center justify-center"></div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Доход</h3>
+                                <span class="card-subtitle">Последние 14 дней</span>
+                            </div>
+                            <div class="p-4"><div class="relative h-60 w-full"><canvas id="salesChart"></canvas></div></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Потребление трафика</h3>
+                                <span class="card-subtitle">Топ 10, ГБ</span>
+                            </div>
+                            <div class="p-4"><div class="relative h-60 w-full"><canvas id="trafficChart"></canvas></div></div>
+                        </div>
                     </div>
-                    
+
                     <!-- RECENT TRANSACTIONS -->
-                    <div class="bg-white dark:bg-darkSurface p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
-                            <h3 class="font-bold text-lg dark:text-white">Последние транзакции</h3>
-                            <span class="text-xs bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-1 rounded-md font-bold border border-emerald-200 dark:border-emerald-800 self-start">Применена комиссия -8%</span>
+                    <div class="card overflow-hidden">
+                        <div class="card-header">
+                            <h3 class="card-title">Последние транзакции</h3>
+                            <span class="card-subtitle">С учётом комиссии 8%</span>
                         </div>
-                        <div class="overflow-x-auto -mx-5 sm:mx-0">
-                            <div class="inline-block min-w-full align-middle px-5 sm:px-0">
-                                <table class="w-full text-left text-sm whitespace-nowrap">
-                                    <thead>
-                                        <tr class="text-slate-500 border-b dark:border-slate-700">
-                                            <th class="px-4 py-3">Пользователь</th>
-                                            <th class="px-4 py-3">Тариф</th>
-                                            <th class="px-4 py-3">Дата</th>
-                                            <th class="px-4 py-3 text-right">Чистая прибыль</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="transactions-table-body" class="divide-y divide-slate-100 dark:divide-slate-800/50"></tbody>
-                                </table>
-                            </div>
+                        <div class="overflow-x-auto">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Пользователь</th>
+                                        <th>Тариф</th>
+                                        <th>Дата</th>
+                                        <th class="text-right">Чистая прибыль</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactions-table-body"></tbody>
+                            </table>
                         </div>
-                        <div class="mt-4 flex justify-center pb-2">
-                            <button id="btn-more-tx" onclick="loadMoreTransactions()" class="hidden px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl transition text-sm font-bold shadow-sm">
-                                Показать еще <i class="fa-solid fa-chevron-down ml-1"></i>
+                        <div class="flex justify-center">
+                            <button id="btn-more-tx" onclick="loadMoreTransactions()" class="hidden w-full py-2.5 border-t border-zinc-100 dark:border-zinc-800 text-xs font-medium muted hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors">
+                                Показать ещё <i class="fa-solid fa-chevron-down ml-1 text-[10px]"></i>
                             </button>
                         </div>
                     </div>
-                    
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-                        <div class="bg-white dark:bg-darkSurface p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-                            <h3 class="font-bold text-lg mb-4 dark:text-white">Доход (Последние 14 дней)</h3>
-                            <div class="relative h-64 w-full">
-                                <canvas id="salesChart"></canvas>
-                            </div>
+
+                    <!-- 3D ГЛОБУС КАРТА СЕТИ -->
+                    <div id="dashboard-globe-card" class="card relative overflow-hidden h-[340px]">
+                        <div class="absolute top-0 left-0 right-0 z-10 px-5 py-3.5 pointer-events-none">
+                            <h3 class="card-title">География узлов</h3>
+                            <p class="card-subtitle mt-0.5">8 локаций</p>
                         </div>
-                        <div class="bg-white dark:bg-darkSurface p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-                            <h3 class="font-bold text-lg mb-4 dark:text-white">Топ 10 по потреблению трафика (ГБ)</h3>
-                            <div class="relative h-64 w-full">
-                                <canvas id="trafficChart"></canvas>
-                            </div>
-                        </div>
+                        <div id="3d-globe" class="w-full h-full flex items-center justify-center"></div>
                     </div>
                 </div>
 
                 <!-- USERS -->
-                <div id="tab-users" class="hidden fade-in space-y-6">
-                    <div class="bg-white dark:bg-darkSurface rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
-                        <div class="p-4 md:p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/30">
+                <div id="tab-users" class="hidden fade-in">
+                    <div class="card overflow-hidden">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border-b border-zinc-100 dark:border-zinc-800">
                             <div class="relative w-full sm:w-72">
-                                <i class="fa-solid fa-search absolute left-4 top-3.5 text-slate-400"></i>
-                                <input type="text" id="search-user" onkeyup="filterUsers()" placeholder="Поиск по ID или имени..." class="w-full pl-11 pr-4 py-3 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-primary text-sm dark:text-white">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400"></i>
+                                <input type="text" id="search-user" onkeyup="filterUsers()" placeholder="Поиск по ID или имени" class="input pl-8">
                             </div>
-                            <button onclick="fetchUsers()" class="w-full sm:w-auto px-5 py-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-100 transition font-medium flex items-center justify-center"><i class="fa-solid fa-rotate-right mr-2"></i> Обновить</button>
+                            <button onclick="fetchUsers()" class="btn btn-secondary"><i class="fa-solid fa-rotate-right text-xs text-zinc-400"></i> Обновить</button>
                         </div>
-                        <div class="overflow-x-auto -mx-4 sm:mx-0">
-                            <div class="inline-block min-w-full align-middle px-4 sm:px-0">
-                                <table class="w-full text-left whitespace-nowrap">
-                                    <thead>
-                                        <tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-xs uppercase tracking-wider border-b dark:border-slate-700">
-                                            <th class="px-6 py-4 font-semibold">Пользователь</th>
-                                            <th class="px-6 py-4 font-semibold">Статус / Истекает</th>
-                                            <th class="px-6 py-4 font-semibold text-center">Устройства</th>
-                                            <th class="px-6 py-4 font-semibold text-right">Управление</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="users-table-body" class="divide-y divide-slate-100 dark:divide-slate-800/50 text-sm"></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SERVERS -->
-                <div id="tab-servers" class="hidden fade-in space-y-6">
-                    <div class="flex justify-between items-center bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
-                        <p class="text-sm text-indigo-800 dark:text-indigo-300 flex items-center"><i class="fa-solid fa-circle-info mr-2 text-indigo-500"></i>Живой мониторинг инстансов X-UI.</p>
-                        <button onclick="fetchServers()" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm font-medium"><i class="fa-solid fa-sync mr-1"></i> Синхронизировать</button>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6" id="server-grid"></div>
-                </div>
-
-                <!-- PROMO CODES -->
-                <div id="tab-promos" class="hidden fade-in space-y-6">
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="col-span-1 bg-white dark:bg-darkSurface p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-                            <h3 class="text-lg font-bold dark:text-white mb-4">Создать код</h3>
-                            <form onsubmit="createPromo(event)" class="space-y-4">
-                                <div><label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Кодовое слово</label><input id="promo-code" required class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white" placeholder="SUMMER24"></div>
-                                
-                                <!-- SEARCH FOR AND REPLACE THIS SECTION IN YOUR HTML FORM -->
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Бонусные дни</label>
-                                        <input id="promo-days" type="number" class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white outline-none" value="0">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Скидка (%)</label>
-                                        <input id="promo-discount" type="number" class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white outline-none" value="0">
-                                    </div>
-                                </div>
-                                <div><label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Максимум использований</label><input id="promo-max" type="number" required class="w-full px-4 py-3 border dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-900 dark:text-white" value="100"></div>
-                                <button class="w-full bg-primary hover:bg-indigo-600 text-white py-3 rounded-xl font-bold transition shadow-lg hover:-translate-y-0.5">Создать код</button>
-                            </form>
-                        </div>
-                        <div class="col-span-1 lg:col-span-2 bg-white dark:bg-darkSurface p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-x-auto">
-                            <h3 class="text-lg font-bold dark:text-white mb-4">Активные промокоды</h3>
-                            <table class="w-full text-left text-sm whitespace-nowrap"><tbody id="promo-table" class="divide-y divide-slate-100 dark:divide-slate-800/50"></tbody></table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- BROADCAST -->
-                <div id="tab-broadcast" class="hidden fade-in space-y-6 flex justify-center">
-                    <div class="bg-white dark:bg-darkSurface p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 w-full max-w-2xl relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10"></div>
-                        <h3 class="text-xl font-bold dark:text-white mb-6 flex items-center"><i class="fa-solid fa-bullseye text-primary mr-2"></i> Точечная рассылка</h3>
-                        <form onsubmit="sendBroadcast(event)" class="space-y-5">
-                            <div>
-                                <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Выберите целевую аудиторию</label>
-                                <select id="bc-target" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-primary dark:text-white outline-none">
-                                    <option value="all">Все пользователи в базе данных</option>
-                                    <option value="active">Только активные подписки</option>
-                                    <option value="expired">Истекшие подписки (Возврат)</option>
-                                    <option value="trial">Только пробные пользователи</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Содержимое сообщения (разрешен HTML)</label>
-                                <textarea id="bc-text" rows="5" required placeholder="Привет! Мы только что добавили новый сервер..." class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-primary dark:text-white outline-none"></textarea>
-                            </div>
-                            <button type="submit" id="btn-broadcast" class="w-full bg-gradient-to-r from-primary to-indigo-600 hover:from-indigo-600 hover:to-primary text-white py-4 rounded-xl font-bold transition shadow-lg hover:-translate-y-0.5 flex justify-center items-center text-lg">
-                                <i class="fa-solid fa-paper-plane mr-2"></i> Запустить рассылку
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- AUDIT LOGS -->
-                <div id="tab-logs" class="hidden fade-in space-y-6">
-                    <div class="bg-white dark:bg-darkSurface p-4 md:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-x-auto">
-                        <table class="w-full text-left text-sm whitespace-nowrap">
-                            <thead><tr class="text-slate-500 uppercase text-xs border-b dark:border-slate-700"><th class="px-4 py-3">Время</th><th class="px-4 py-3">Администратор</th><th class="px-4 py-3">Детали действия</th></tr></thead>
-                            <tbody id="logs-table" class="divide-y divide-slate-100 dark:divide-slate-800/50"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- GENERATE SUB -->
-                <div id="tab-generate" class="hidden fade-in space-y-6 flex justify-center">
-                    <div class="bg-white dark:bg-darkSurface p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 w-full max-w-2xl relative overflow-hidden">
-                        <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-pink-500/10 rounded-full blur-3xl -z-10"></div>
-                        <h3 class="text-2xl font-bold dark:text-white mb-2">Выдать подписку</h3>
-                        <p class="text-sm text-slate-500 mb-6">Сгенерируйте VPN-ссылку и отправьте ее напрямую через личные сообщения бота.</p>
-                        <form onsubmit="generateSubscription(event)" class="space-y-5">
-                            <div><label class="block text-sm font-medium mb-1 text-slate-600 dark:text-slate-400">Telegram ID / @username</label><input type="text" id="gen-user-id" required placeholder="напр. 5146625949" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl focus:ring-2 focus:ring-primary dark:text-white outline-none"></div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div><label class="block text-sm font-medium mb-1 text-slate-600 dark:text-slate-400">Устройства</label><select id="gen-devices" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl dark:text-white outline-none"><option value="1">1 Устройство</option><option value="3">3 Устройства</option><option value="0">Безлимит</option></select></div>
-                                <div><label class="block text-sm font-medium mb-1 text-slate-600 dark:text-slate-400">Месяцы</label><select id="gen-months" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl dark:text-white outline-none"><option value="1">1 Месяц</option><option value="12">12 Месяцев</option></select></div>
-                            </div>
-                            <button type="submit" id="btn-generate" class="w-full bg-slate-800 dark:bg-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg hover:-translate-y-0.5 transition flex justify-center items-center text-lg mt-2"><i class="fa-solid fa-magic mr-2 text-pink-400"></i> Выдать и Отправить</button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- PRICES -->
-                <div id="tab-prices" class="hidden fade-in space-y-6">
-                    <div class="bg-white dark:bg-darkSurface p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-                        <h3 class="text-xl font-bold dark:text-white mb-6 flex items-center"><i class="fa-solid fa-tags text-primary mr-2"></i> Управление ценами тарифов</h3>
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm whitespace-nowrap">
+                            <table class="data-table">
                                 <thead>
-                                    <tr class="text-slate-500 uppercase text-xs border-b dark:border-slate-700">
-                                        <th class="px-4 py-3">Устройства</th>
-                                        <th class="px-4 py-3">Срок подписки</th>
-                                        <th class="px-4 py-3">Цена тарифа (₽)</th>
-                                        <th class="px-4 py-3 text-right">Действие</th>
+                                    <tr>
+                                        <th>Пользователь</th>
+                                        <th>Статус</th>
+                                        <th>Истекает</th>
+                                        <th class="text-center">Устройства</th>
+                                        <th class="w-12"></th>
                                     </tr>
                                 </thead>
-                                <tbody id="prices-table-body" class="divide-y divide-slate-100 dark:divide-slate-800/50"></tbody>
+                                <tbody id="users-table-body"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
+                <!-- SERVERS -->
+                <div id="tab-servers" class="hidden fade-in space-y-4">
+                    <div class="flex items-center justify-between gap-3">
+                        <p class="text-sm muted">Мониторинг инстансов X-UI в реальном времени</p>
+                        <button onclick="fetchServers()" class="btn btn-secondary btn-sm"><i class="fa-solid fa-rotate text-zinc-400"></i> Синхронизировать</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="server-grid"></div>
+                </div>
+
+                <!-- PROMO CODES -->
+                <div id="tab-promos" class="hidden fade-in">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
+                        <div class="card">
+                            <div class="card-header"><h3 class="card-title">Новый промокод</h3></div>
+                            <form onsubmit="createPromo(event)" class="p-5 space-y-4">
+                                <div>
+                                    <label class="label" for="promo-code">Кодовое слово</label>
+                                    <input id="promo-code" required class="input font-mono uppercase" placeholder="SUMMER24">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="label" for="promo-days">Бонусные дни</label>
+                                        <input id="promo-days" type="number" class="input" value="0">
+                                    </div>
+                                    <div>
+                                        <label class="label" for="promo-discount">Скидка, %</label>
+                                        <input id="promo-discount" type="number" class="input" value="0">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="label" for="promo-max">Максимум использований</label>
+                                    <input id="promo-max" type="number" required class="input" value="100">
+                                </div>
+                                <button class="btn btn-primary w-full">Создать код</button>
+                            </form>
+                        </div>
+                        <div class="card lg:col-span-2 overflow-hidden">
+                            <div class="card-header"><h3 class="card-title">Активные промокоды</h3></div>
+                            <div class="overflow-x-auto">
+                                <table class="data-table">
+                                    <thead><tr><th>Код</th><th>Награда</th><th class="text-right">Использовано</th></tr></thead>
+                                    <tbody id="promo-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BROADCAST -->
+                <div id="tab-broadcast" class="hidden fade-in">
+                    <div class="card max-w-2xl mx-auto">
+                        <div class="card-header flex-col items-start gap-0.5">
+                            <h3 class="card-title">Точечная рассылка</h3>
+                            <p class="card-subtitle">Сообщение будет отправлено через бота выбранной аудитории</p>
+                        </div>
+                        <form onsubmit="sendBroadcast(event)" class="p-5 space-y-4">
+                            <div>
+                                <label class="label" for="bc-target">Аудитория</label>
+                                <select id="bc-target" class="input">
+                                    <option value="all">Все пользователи в базе данных</option>
+                                    <option value="active">Только активные подписки</option>
+                                    <option value="expired">Истекшие подписки (возврат)</option>
+                                    <option value="trial">Только пробные пользователи</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="label" for="bc-text">Сообщение <span class="font-normal text-zinc-400">· разрешён HTML</span></label>
+                                <textarea id="bc-text" rows="6" required placeholder="Привет! Мы только что добавили новый сервер..." class="input"></textarea>
+                            </div>
+                            <div class="flex justify-end pt-1">
+                                <button type="submit" id="btn-broadcast" class="btn btn-primary w-full sm:w-auto">
+                                    <i class="fa-solid fa-paper-plane text-xs"></i> Запустить рассылку
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- AUDIT LOGS -->
+                <div id="tab-logs" class="hidden fade-in">
+                    <div class="card overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="data-table">
+                                <thead><tr><th>Время</th><th>Администратор</th><th>Действие</th></tr></thead>
+                                <tbody id="logs-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GENERATE SUB -->
+                <div id="tab-generate" class="hidden fade-in">
+                    <div class="card max-w-2xl mx-auto">
+                        <div class="card-header flex-col items-start gap-0.5">
+                            <h3 class="card-title">Выдать подписку</h3>
+                            <p class="card-subtitle">Сгенерируйте VPN-ссылку и отправьте её пользователю в личные сообщения бота</p>
+                        </div>
+                        <form onsubmit="generateSubscription(event)" class="p-5 space-y-4">
+                            <div>
+                                <label class="label" for="gen-user-id">Telegram ID / @username</label>
+                                <input type="text" id="gen-user-id" required placeholder="напр. 5146625949" class="input">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="label" for="gen-devices">Устройства</label>
+                                    <select id="gen-devices" class="input"><option value="1">1 устройство</option><option value="3">3 устройства</option><option value="0">Безлимит</option></select>
+                                </div>
+                                <div>
+                                    <label class="label" for="gen-months">Срок</label>
+                                    <select id="gen-months" class="input"><option value="1">1 месяц</option><option value="12">12 месяцев</option></select>
+                                </div>
+                            </div>
+                            <div class="flex justify-end pt-1">
+                                <button type="submit" id="btn-generate" class="btn btn-primary w-full sm:w-auto">Выдать и отправить</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- PRICES -->
+                <div id="tab-prices" class="hidden fade-in">
+                    <div class="card overflow-hidden">
+                        <div class="card-header flex-col items-start gap-0.5">
+                            <h3 class="card-title">Цены тарифов</h3>
+                            <p class="card-subtitle">Изменения применяются в боте и на Lava сразу после сохранения</p>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Устройства</th>
+                                        <th>Срок</th>
+                                        <th>Цена, ₽</th>
+                                        <th class="text-right"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="prices-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+              </div>
             </div>
         </main>
     </div>
 
     <!-- Modals & Toasts -->
-    <div id="add-days-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-[60] transition-opacity p-4">
-        <div class="bg-white dark:bg-darkSurface p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-200 dark:border-slate-700 transform transition-transform">
-            <h3 class="text-xl font-bold dark:text-white mb-2">Добавить бонусные дни</h3>
-            <p class="text-sm text-slate-500 mb-6">Пополнить баланс пользователя: <span id="modal-uid" class="font-bold text-primary bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded"></span></p>
-            <input type="number" id="days-to-add" value="30" class="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 rounded-xl mb-6 dark:text-white font-medium text-lg outline-none focus:ring-2 focus:ring-primary">
-            <div class="flex space-x-3">
-                <button onclick="closeModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 py-3 rounded-xl font-bold transition">Отмена</button>
-                <button onclick="confirmAddDays()" class="flex-1 bg-primary hover:bg-indigo-600 text-white py-3 rounded-xl font-bold transition shadow-lg">Подтвердить</button>
+    <div id="add-days-modal" class="fixed inset-0 bg-zinc-950/40 hidden items-center justify-center z-[60] p-4">
+        <div class="card w-full max-w-sm p-5 shadow-xl fade-in">
+            <h3 class="text-base font-semibold">Добавить бонусные дни</h3>
+            <p class="text-sm muted mt-1 mb-4">Пользователь <span id="modal-uid" class="font-mono text-zinc-900 dark:text-zinc-100"></span></p>
+            <label class="label" for="days-to-add">Количество дней</label>
+            <input type="number" id="days-to-add" value="30" class="input mb-5">
+            <div class="flex justify-end gap-2">
+                <button onclick="closeModal()" class="btn btn-secondary">Отмена</button>
+                <button onclick="confirmAddDays()" class="btn btn-primary">Подтвердить</button>
             </div>
         </div>
     </div>
-    
-    <div id="toast-container" class="fixed bottom-5 right-5 space-y-3 z-[100] flex flex-col items-end"></div>
+
+    <div id="toast-container" class="fixed bottom-4 right-4 space-y-2 z-[100] flex flex-col items-end"></div>
 
     <script>
         const API_BASE = "https://api.compactvpn.fun:8443";
-        const ADMIN_TOKEN = "CompactAdmin2026"; 
+        const ADMIN_TOKEN = "CompactAdmin2026";
 
         let usersList =[];
         let selectedUserIdForDays = null;
@@ -597,8 +504,8 @@
                   .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
                   .backgroundColor('rgba(0,0,0,0)')
                   .showAtmosphere(true)
-                  .atmosphereColor('#6366f1')
-                  .atmosphereAltitude(0.15)
+                  .atmosphereColor('#818cf8')
+                  .atmosphereAltitude(0.1)
                   .width(container.clientWidth || 500)
                   .height(container.clientHeight || 340);
 
@@ -615,29 +522,30 @@
                 ];
 
                 // Дуги трафика из СНГ/России к узлам связи
+                const arcColor = 'rgba(165, 180, 252, 0.55)';
                 const arcData = [
-                    { startLat: 55.7558, startLng: 37.6173, endLat: 60.1699, endLng: 24.9384, color: '#ec4899' },
-                    { startLat: 55.7558, startLng: 37.6173, endLat: 50.1109, endLng: 8.6821, color: '#6366f1' },
-                    { startLat: 55.7558, startLng: 37.6173, endLat: 52.3676, endLng: 4.9041, color: '#ec4899' },
-                    { startLat: 55.7558, startLng: 37.6173, endLat: 42.6977, endLng: 23.3219, color: '#6366f1' }
+                    { startLat: 55.7558, startLng: 37.6173, endLat: 60.1699, endLng: 24.9384 },
+                    { startLat: 55.7558, startLng: 37.6173, endLat: 50.1109, endLng: 8.6821 },
+                    { startLat: 55.7558, startLng: 37.6173, endLat: 52.3676, endLng: 4.9041 },
+                    { startLat: 55.7558, startLng: 37.6173, endLat: 42.6977, endLng: 23.3219 }
                 ];
 
                 globe.pointsData(serverData)
-                     .pointColor(() => '#6366f1')
-                     .pointAltitude(0.07)
-                     .pointRadius(0.8)
+                     .pointColor(() => '#a5b4fc')
+                     .pointAltitude(0.02)
+                     .pointRadius(0.55)
                      .pointLabel(d => d.name);
 
                 globe.arcsData(arcData)
-                     .arcColor(d => d.color)
-                     .arcDashLength(0.4)
-                     .arcDashGap(4)
-                     .arcDashAnimateTime(1500)
-                     .arcAltitude(0.25)
-                     .arcStroke(0.5);
+                     .arcColor(() => arcColor)
+                     .arcDashLength(0.5)
+                     .arcDashGap(2)
+                     .arcDashAnimateTime(4000)
+                     .arcAltitude(0.2)
+                     .arcStroke(0.35);
 
                 globe.controls().autoRotate = true;
-                globe.controls().autoRotateSpeed = 0.8;
+                globe.controls().autoRotateSpeed = 0.3;
                 globe.controls().enableZoom = false;
 
                 globeInitialized = true;
@@ -677,10 +585,10 @@
 
         function logToCli(text, type = 'info') {
             const logsEl = document.getElementById('cli-logs');
-            const colorClass = type === 'error' ? 'text-rose-500' : type === 'success' ? 'text-emerald-400' : 'text-slate-300';
+            const colorClass = type === 'error' ? 'text-rose-400' : type === 'success' ? 'text-emerald-400' : 'text-zinc-300';
             const logLine = document.createElement('div');
             logLine.className = colorClass;
-            logLine.innerHTML = `[${new Date().toLocaleTimeString()}] ${text}`;
+            logLine.innerHTML = `<span class="text-zinc-600">[${new Date().toLocaleTimeString()}]</span> ${text}`;
             logsEl.appendChild(logLine);
             logsEl.scrollTop = logsEl.scrollHeight;
         }
@@ -690,14 +598,14 @@
             const inputEl = document.getElementById('cli-input');
             const command = inputEl.value.trim();
             if (!command) return;
-            
+
             logToCli(`&gt; ${command}`, 'info');
             inputEl.value = '';
-            
+
             const parts = command.split(' ');
             const action = parts[0].toLowerCase();
             const args = parts.slice(1);
-            
+
             if (action === 'help') {
                 logToCli("Доступные команды CLI терминала:", 'success');
                 logToCli("• <b>help</b> - показать это руководство", 'success');
@@ -710,12 +618,12 @@
                 logToCli("• <b>cls / clear</b> - очистить экран логов", 'success');
                 return;
             }
-            
+
             if (action === 'clear' || action === 'cls') {
                 document.getElementById('cli-logs').innerHTML = '';
                 return;
             }
-            
+
             if (action === 'stats') {
                 try {
                     let res = await fetch(`${API_BASE}/api/admin/stats`, { headers: getHeaders() });
@@ -726,7 +634,7 @@
                 }
                 return;
             }
-            
+
             if (action === 'ban') {
                 if (args.length < 1) return logToCli("Использование: ban &lt;user_id&gt;", 'error');
                 const uid = args[0];
@@ -819,13 +727,14 @@
             const user = sessionStorage.getItem('admin_user');
             if(user) {
                 document.getElementById('login-screen').classList.add('opacity-0', 'pointer-events-none');
-                setTimeout(() => document.getElementById('login-screen').classList.add('hidden'), 500);
-                
+                setTimeout(() => document.getElementById('login-screen').classList.add('hidden'), 300);
+
                 document.getElementById('app-container').classList.remove('hidden');
                 setTimeout(() => document.getElementById('app-container').classList.remove('opacity-0'), 50);
-                
+
                 document.getElementById('admin-name').innerText = '@' + user;
-                
+                document.querySelector('#sidebar .rounded-full').innerText = user.charAt(0).toUpperCase();
+
                 fetchStats(); fetchCharts(); fetchUsers(); fetchTransactions();
                 setTimeout(init3DGlobe, 600); // Строим глобус после загрузки
             } else {
@@ -838,7 +747,7 @@
             e.preventDefault();
             const u = document.getElementById('login-user').value.trim().replace('@', '').toLowerCase();
             const p = document.getElementById('login-pass').value;
-            
+
             if((u === 'vasiliy' || u === 'katsyka' || u === 'grachev5') && p === 'compact2026') {
                 sessionStorage.setItem('admin_user', u);
                 showToast(`Добро пожаловать, ${u}!`, 'success');
@@ -853,7 +762,7 @@
             try {
                 let res = await fetch(`${API_BASE}/api/admin/prices`, { headers: getHeaders() });
                 let prices = await res.json();
-                
+
                 // Сортировка по устройствам, а затем по месяцам
                 prices.sort((a, b) => {
                     if (a.devices !== b.devices) return a.devices - b.devices;
@@ -863,16 +772,14 @@
                 document.getElementById('prices-table-body').innerHTML = prices.map(p => {
                     const devText = p.devices === 0 ? "Безлимит" : `${p.devices} устр.`;
                     return `
-                        <tr class="dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/30 border-b border-slate-50 dark:border-slate-800/50">
-                            <td class="py-4 px-4 font-bold text-slate-800 dark:text-white">${devText}</td>
-                            <td class="px-4 font-semibold">${p.months} мес.</td>
-                            <td class="px-4">
-                                <input id="price-input-${p.devices}-${p.months}" type="number" value="${p.price}" class="w-24 px-3 py-1.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg text-center dark:text-white text-sm font-bold outline-none">
+                        <tr class="row-hover">
+                            <td class="font-medium">${devText}</td>
+                            <td class="muted">${p.months} мес.</td>
+                            <td>
+                                <input id="price-input-${p.devices}-${p.months}" type="number" value="${p.price}" class="input h-8 w-28 tabular">
                             </td>
-                            <td class="px-4 text-right">
-                                <button onclick="updatePrice(${p.devices}, ${p.months}, this)" class="px-4 py-2 bg-primary hover:bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-sm transition">
-                                    Сохранить
-                                </button>
+                            <td class="text-right">
+                                <button onclick="updatePrice(${p.devices}, ${p.months}, this)" class="btn btn-secondary btn-sm">Сохранить</button>
                             </td>
                         </tr>
                     `;
@@ -889,9 +796,9 @@
                 showToast('Введите корректную цену', 'error');
                 return;
             }
-            
+
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Сохранение...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Сохранение';
             btn.disabled = true;
 
             try {
@@ -932,7 +839,7 @@
                 setTimeout(()=> backdrop.classList.add('opacity-100'), 10);
             } else {
                 backdrop.classList.remove('opacity-100');
-                setTimeout(()=> backdrop.classList.add('hidden'), 300);
+                setTimeout(()=> backdrop.classList.add('hidden'), 200);
             }
         }
 
@@ -943,9 +850,9 @@
 
         function toggleDarkMode() {
             const html = document.documentElement; const icon = document.getElementById('theme-icon');
-            if (html.classList.contains('dark')) { html.classList.remove('dark'); localStorage.setItem('theme', 'light'); icon.classList.replace('fa-sun', 'fa-moon'); } 
+            if (html.classList.contains('dark')) { html.classList.remove('dark'); localStorage.setItem('theme', 'light'); icon.classList.replace('fa-sun', 'fa-moon'); }
             else { html.classList.add('dark'); localStorage.setItem('theme', 'dark'); icon.classList.replace('fa-moon', 'fa-sun'); }
-            
+
             if(salesChartObj) fetchCharts();
         }
 
@@ -955,8 +862,10 @@
         function showToast(msg, type='success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            toast.className = `${type==='success'?'bg-emerald-500':'bg-rose-500'} text-white px-6 py-3 rounded-2xl shadow-xl flex items-center space-x-3 fade-in font-medium text-sm`;
-            toast.innerHTML = `<i class="fa-solid fa-${type==='success'?'check':'triangle-exclamation'}"></i><span>${msg}</span>`;
+            toast.className = 'card shadow-lg px-4 py-3 flex items-center gap-3 fade-in text-sm max-w-sm';
+            toast.innerHTML = type === 'success'
+                ? `<i class="fa-solid fa-circle-check text-emerald-500"></i><span>${msg}</span>`
+                : `<i class="fa-solid fa-circle-exclamation text-rose-500"></i><span>${msg}</span>`;
             container.appendChild(toast); setTimeout(() => toast.remove(), 4000);
         }
 
@@ -965,17 +874,16 @@
                 const el = document.getElementById(`tab-${t}`);
                 if(el) el.classList.add('hidden');
                 const nav = document.getElementById(`nav-${t}`);
-                if(nav) { nav.classList.remove('active'); nav.querySelector('i').classList.remove('text-white'); }
+                if(nav) nav.classList.remove('active');
             });
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            const navBtn = document.getElementById(`nav-${tabId}`);
-            navBtn.classList.add('active'); navBtn.querySelector('i').classList.add('text-white');
-            
-            const titles = { dashboard: 'Обзор панели управления', users: 'Управление пользователями', servers: 'Состояние серверов', promos: 'Промокоды', broadcast: 'Система рассылок', logs: 'Системные журналы', generate: 'Выдача подписки', prices: 'Управление ценами'};
+            document.getElementById(`nav-${tabId}`).classList.add('active');
+
+            const titles = { dashboard: 'Обзор', users: 'Пользователи', servers: 'Серверы', promos: 'Промокоды', broadcast: 'Рассылка', logs: 'Журнал аудита', generate: 'Выдача подписки', prices: 'Цены'};
             document.getElementById('page-title').innerText = titles[tabId] || 'Панель';
-            
+
             if(window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) toggleSidebar();
-            
+
             if(tabId === 'servers') fetchServers();
             if(tabId === 'promos') fetchPromos();
             if(tabId === 'logs') fetchLogs();
@@ -990,27 +898,39 @@
                 let res = await fetch(`${API_BASE}/api/admin/stats`, { headers: getHeaders() });
                 let data = await res.json();
                 ['stat-total-users','stat-active-subs','stat-revenue'].forEach(id => document.getElementById(id).classList.remove('skeleton'));
-                document.getElementById('stat-total-users').innerText = data.totalUsers;
-                document.getElementById('stat-active-subs').innerText = data.activeSubs;
+                document.getElementById('stat-total-users').innerText = data.totalUsers.toLocaleString();
+                document.getElementById('stat-active-subs').innerText = data.activeSubs.toLocaleString();
                 document.getElementById('stat-revenue').innerText = "₽ " + data.revenue.toLocaleString();
             } catch (e) { console.error(e); }
         }
 
         async function fetchCharts() {
             const isDark = document.documentElement.classList.contains('dark');
-            const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
-            const textColor = isDark ? '#94a3b8' : '#64748b';
+            const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
+            const textColor = isDark ? '#71717a' : '#a1a1aa';
+            const accent = isDark ? '#818cf8' : '#6366f1';
+
+            Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+            Chart.defaults.font.size = 11;
+            const tooltip = {
+                backgroundColor: isDark ? '#27272a' : '#18181b', padding: 8, cornerRadius: 6,
+                displayColors: false, titleFont: { weight: '500' }
+            };
+            const scales = {
+                x: { grid: { display: false }, border: { display: false }, ticks: { color: textColor, maxRotation: 0, autoSkipPadding: 12 } },
+                y: { grid: { color: gridColor }, border: { display: false }, ticks: { color: textColor, maxTicksLimit: 5 }, beginAtZero: true }
+            };
 
             try {
                 let res = await fetch(`${API_BASE}/api/admin/charts`, { headers: getHeaders() });
                 let data = await res.json();
-                
+
                 let ctx = document.getElementById('salesChart').getContext('2d');
                 if(salesChartObj) salesChartObj.destroy();
                 salesChartObj = new Chart(ctx, {
                     type: 'line',
-                    data: { labels: data.sales.map(s=>s.date.split('-').slice(1).join('/')), datasets:[{ label: 'Доход', data: data.sales.map(s=>s.revenue), borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.2)', fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#6366f1' }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks:{color: textColor} }, y: { grid: { color: gridColor }, ticks:{color: textColor} } } }
+                    data: { labels: data.sales.map(s=>s.date.split('-').slice(1).join('/')), datasets:[{ label: 'Доход', data: data.sales.map(s=>s.revenue), borderColor: accent, borderWidth: 2, backgroundColor: isDark ? 'rgba(129,140,248,0.08)' : 'rgba(99,102,241,0.06)', fill: true, tension: 0.35, pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: accent }] },
+                    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, tooltip }, scales }
                 });
 
                 let resT = await fetch(`${API_BASE}/api/admin/traffic`, { headers: getHeaders() });
@@ -1019,37 +939,41 @@
                 if(trafficChartObj) trafficChartObj.destroy();
                 trafficChartObj = new Chart(ctxT, {
                     type: 'bar',
-                    data: { labels: dataT.map(t=>t.username.substring(0,8)), datasets:[{ label: 'ГБ', data: dataT.map(t=>t.gb), backgroundColor: '#ec4899', borderRadius: 6 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks:{color: textColor} }, y: { grid: { color: gridColor }, ticks:{color: textColor} } } }
+                    data: { labels: dataT.map(t=>t.username.substring(0,8)), datasets:[{ label: 'ГБ', data: dataT.map(t=>t.gb), backgroundColor: isDark ? 'rgba(129,140,248,0.7)' : 'rgba(99,102,241,0.75)', hoverBackgroundColor: accent, borderRadius: 4, maxBarThickness: 28 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip }, scales }
                 });
             } catch(e) {}
         }
-        
+
         let allTransactions =[];
         let txLimit = 3;
-        
+
         async function fetchTransactions() {
             try {
                 let res = await fetch(`${API_BASE}/api/admin/transactions`, { headers: getHeaders() });
                 allTransactions = await res.json();
-                txLimit = 3; 
+                txLimit = 3;
                 renderTransactions();
             } catch(e) { console.error(e); }
         }
-        
+
+        function avatar(name, size = 'w-6 h-6 text-[10px]') {
+            return `<div class="${size} rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 flex items-center justify-center font-semibold shrink-0">${(name || '?').charAt(0).toUpperCase()}</div>`;
+        }
+
         function renderTransactions() {
             const container = document.getElementById('transactions-table-body');
             const visibleTxs = allTransactions.slice(0, txLimit);
-            
+
             container.innerHTML = visibleTxs.map(t => `
-                <tr class="dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition">
-                    <td class="py-3 px-4 flex items-center"><div class="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-500 flex items-center justify-center mr-2 text-[10px] font-bold">${t.username.charAt(0).toUpperCase()}</div> @${t.username}</td>
-                    <td class="px-4 text-xs font-medium text-slate-500">${t.plan}</td>
-                    <td class="px-4 text-xs text-slate-400">${new Date(t.date).toLocaleString()}</td>
-                    <td class="px-4 text-right font-bold text-emerald-500">+₽ ${t.net_revenue}</td>
+                <tr class="row-hover">
+                    <td><div class="flex items-center gap-2.5">${avatar(t.username)}<span class="font-medium">@${t.username}</span></div></td>
+                    <td class="muted">${t.plan}</td>
+                    <td class="muted tabular">${new Date(t.date).toLocaleString()}</td>
+                    <td class="text-right font-medium tabular text-emerald-600 dark:text-emerald-400">+₽ ${t.net_revenue}</td>
                 </tr>
-            `).join('');
-        
+            `).join('') || `<tr><td colspan="4" class="text-center muted py-8">Транзакций пока нет</td></tr>`;
+
             const btn = document.getElementById('btn-more-tx');
             if (allTransactions.length > txLimit) {
                 btn.classList.remove('hidden');
@@ -1057,12 +981,12 @@
                 btn.classList.add('hidden');
             }
         }
-        
+
         function loadMoreTransactions() {
-            txLimit += 5; 
+            txLimit += 5;
             renderTransactions();
         }
-        
+
         async function fetchUsers() {
             try {
                 let res = await fetch(`${API_BASE}/api/admin/users`, { headers: getHeaders() });
@@ -1072,62 +996,56 @@
         }
 
         function filterUsers() { renderUsers(document.getElementById('search-user').value); }
-        
+
         function renderUsers(filterText = "") {
             const tbody = document.getElementById('users-table-body');
             tbody.innerHTML = '';
             usersList.filter(u => u.id.toString().includes(filterText) || (u.username && u.username.toLowerCase().includes(filterText.toLowerCase()))).forEach(u => {
                 const isExpired = u.expiry > 0 && u.expiry < Date.now();
-                const expiryStr = u.expiry > 0 ? new Date(u.expiry).toLocaleDateString() : "Никогда";
-                
-                let badge;
-                if (u.banned) {
-                    badge = `<span class="bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 px-2.5 py-1 rounded-md text-xs font-bold border border-rose-200 dark:border-rose-900/40">Бан</span>`;
-                } else if (u.expiry === 0) {
-                    badge = `<span class="bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 px-2.5 py-1 rounded-md text-xs font-bold border border-slate-200 dark:border-slate-700">Нет активности</span>`;
-                } else if (isExpired) {
-                    badge = `<span class="bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 px-2.5 py-1 rounded-md text-xs font-bold border border-amber-200 dark:border-amber-900/40">Истекла</span>`;
-                } else {
-                    badge = `<span class="bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-md text-xs font-bold border border-emerald-200 dark:border-emerald-900/40">Активна</span>`;
-                }
-                
+                const expiryStr = u.expiry > 0 ? new Date(u.expiry).toLocaleDateString() : "—";
+
+                let status;
+                if (u.banned) status = ['Бан', 'bg-rose-500'];
+                else if (u.expiry === 0) status = ['Нет активности', 'bg-zinc-300 dark:bg-zinc-600'];
+                else if (isExpired) status = ['Истекла', 'bg-amber-500'];
+                else status = ['Активна', 'bg-emerald-500'];
+                const badge = `<span class="badge"><span class="dot ${status[1]}"></span>${status[0]}</span>`;
+
                 // User Row
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/30 transition border-b dark:border-slate-800/50 cursor-pointer";
+                tr.className = "row-hover cursor-pointer";
                 tr.setAttribute('onclick', `toggleUserDetails(${u.id})`);
                 tr.innerHTML = `
-                    <td class="px-6 py-4">
-                        <div class="font-bold dark:text-white flex items-center">
-                            <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-500 flex items-center justify-center mr-3 text-xs font-bold">${u.username.charAt(0).toUpperCase()}</div>
-                            ${u.username||'Без Имени'}
+                    <td>
+                        <div class="flex items-center gap-3">
+                            ${avatar(u.username, 'w-8 h-8 text-xs')}
+                            <div>
+                                <div class="font-medium">${u.username||'Без имени'}</div>
+                                <div class="text-xs text-zinc-400 font-mono">${u.id}</div>
+                            </div>
                         </div>
-                        <div class="text-[11px] text-slate-400 font-mono mt-1 ml-11">${u.id}</div>
                     </td>
-                    <td class="px-6 py-4">
-                        <div class="mb-1.5">${badge}</div>
-                        <div class="text-[11px] text-slate-500 font-medium"><i class="fa-regular fa-calendar mr-1"></i>${expiryStr}</div>
-                    </td>
-                    <td class="px-6 py-4 text-center dark:text-white font-medium">${u.devices === 0 ? "Безлимит" : u.devices}</td>
-                    <td class="px-6 py-4 text-right">
-                        <button class="p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition shadow-sm">
-                            <i id="arrow-${u.id}" class="fa-solid fa-chevron-down transition-transform duration-300"></i>
-                        </button>
+                    <td>${badge}</td>
+                    <td class="muted tabular">${expiryStr}</td>
+                    <td class="text-center tabular">${u.devices === 0 ? "∞" : u.devices}</td>
+                    <td class="text-right">
+                        <span class="btn-icon"><i id="arrow-${u.id}" class="fa-solid fa-chevron-down text-[11px] transition-transform duration-200"></i></span>
                     </td>
                 `;
-                
+
                 // Expandable Detail Row
                 const detailTr = document.createElement('tr');
                 detailTr.id = `details-${u.id}`;
-                detailTr.className = "hidden bg-slate-50/50 dark:bg-slate-900/20";
+                detailTr.className = "hidden bg-zinc-50/70 dark:bg-zinc-950/40";
                 detailTr.innerHTML = `
-                    <td colspan="4" class="px-6 py-4 border-b border-slate-200 dark:border-slate-800">
-                        <div id="loading-details-${u.id}" class="text-center py-6 text-slate-500">
-                            <i class="fa-solid fa-spinner fa-spin mr-2"></i>Загрузка детальной статистики...
+                    <td colspan="5" class="!px-5 !py-5">
+                        <div id="loading-details-${u.id}" class="text-center py-6 muted text-xs">
+                            <i class="fa-solid fa-spinner fa-spin mr-2"></i>Загрузка...
                         </div>
-                        <div id="content-details-${u.id}" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6 text-sm fade-in"></div>
+                        <div id="content-details-${u.id}" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6 text-sm whitespace-normal fade-in"></div>
                     </td>
                 `;
-                
+
                 tbody.appendChild(tr);
                 tbody.appendChild(detailTr);
             });
@@ -1137,7 +1055,7 @@
         async function toggleUserDetails(uid) {
             const detailsRow = document.getElementById(`details-${uid}`);
             const arrow = document.getElementById(`arrow-${uid}`);
-            
+
             if (event.target.closest('input') || event.target.closest('button') || event.target.closest('select')) {
                 return; // Stop event bubbling inside the panel form
             }
@@ -1147,99 +1065,76 @@
                 arrow.style.transform = 'rotate(0deg)';
                 return;
             }
-            
+
             // Toggle view
             detailsRow.classList.remove('hidden');
             arrow.style.transform = 'rotate(180deg)';
-            
+
             const loading = document.getElementById(`loading-details-${uid}`);
             const content = document.getElementById(`content-details-${uid}`);
-            
+
             loading.classList.remove('hidden');
             content.classList.add('hidden');
-            
+
             try {
                 let res = await fetch(`${API_BASE}/api/admin/user_details/${uid}`, { headers: getHeaders() });
                 let u = await res.json();
-                
+
                 loading.classList.add('hidden');
                 content.classList.remove('hidden');
-                
+
                 let trafficHtml = '';
                 for (const [serverName, gb] of Object.entries(u.server_traffic)) {
                     trafficHtml += `
-                        <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800/40 text-xs">
-                            <span class="text-slate-600 dark:text-slate-400 font-medium">${serverName}</span>
-                            <span class="font-mono font-bold dark:text-white">${gb} GB</span>
+                        <div class="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-800 last:border-0 text-xs">
+                            <span class="muted">${serverName}</span>
+                            <span class="font-medium tabular">${gb} GB</span>
                         </div>
                     `;
                 }
-                
+
                 content.innerHTML = `
-                    <div class="space-y-4 border-r border-slate-100 dark:border-slate-800/40 pr-0 md:pr-6">
-                        <div class="grid grid-cols-2 gap-3 text-xs">
-                            <div>
-                                <span class="text-slate-400 block mb-0.5">Регистрация</span>
-                                <strong class="dark:text-white">${u.reg_date || 'Неизвестно'}</strong>
-                            </div>
-                            <div>
-                                <span class="text-slate-400 block mb-0.5">Пробный период</span>
-                                <strong class="dark:text-white">${u.trial_used ? 'Использован' : 'Доступен'}</strong>
-                            </div>
-                            <div>
-                                <span class="text-slate-400 block mb-0.5">Баланс</span>
-                                <strong class="text-emerald-500 font-bold">${u.balance} ₽</strong>
-                            </div>
-                            <div>
-                                <span class="text-slate-400 block mb-0.5">Рефералы</span>
-                                <strong class="dark:text-white">${u.referrals} чел.</strong>
-                            </div>
-                        </div>
-                        
-                        <div class="pt-4 border-t border-slate-100 dark:border-slate-800/40 space-y-3">
-                            <h5 class="font-bold text-xs uppercase tracking-wider text-slate-400">Управление подпиской</h5>
-                            <div class="flex flex-wrap gap-2">
-                                <button onclick="changeBanState(${u.id}, ${u.banned ? 0 : 1})" class="px-3.5 py-2 ${u.banned ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-rose-500 hover:bg-rose-600'} text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center">
-                                    <i class="fa-solid ${u.banned ? 'fa-user-check' : 'fa-user-slash'} mr-1.5"></i>${u.banned ? 'Разблокировать' : 'Заблокировать'}
-                                </button>
-                                <button onclick="giftUser(${u.id})" class="px-3.5 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center">
-                                    <i class="fa-solid fa-gift mr-1.5"></i>Бонус 24ч
-                                </button>
-                            </div>
-                            
-                            <div class="grid grid-cols-2 gap-3 pt-2">
-                                <div>
-                                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Добавить дней</label>
-                                    <div class="flex gap-1.5">
-                                        <input type="number" id="inline-add-days-${u.id}" value="30" class="w-16 px-2 py-1.5 border dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg text-center dark:text-white text-xs font-bold outline-none">
-                                        <button onclick="modifyUserDays(${u.id}, 'add')" class="px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-bold hover:bg-indigo-600 transition shadow-sm"><i class="fa-solid fa-plus"></i></button>
-                                    </div>
+                    <div class="space-y-5">
+                        <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-xs">
+                            <div><dt class="muted mb-0.5">Регистрация</dt><dd class="font-medium">${u.reg_date || 'Неизвестно'}</dd></div>
+                            <div><dt class="muted mb-0.5">Пробный период</dt><dd class="font-medium">${u.trial_used ? 'Использован' : 'Доступен'}</dd></div>
+                            <div><dt class="muted mb-0.5">Баланс</dt><dd class="font-medium tabular">${u.balance} ₽</dd></div>
+                            <div><dt class="muted mb-0.5">Рефералы</dt><dd class="font-medium tabular">${u.referrals} чел.</dd></div>
+                        </dl>
+
+                        <div class="pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-3">
+                            <h5 class="text-xs font-medium muted">Управление подпиской</h5>
+                            <div class="flex flex-wrap items-end gap-2">
+                                <div class="flex">
+                                    <input type="number" id="inline-add-days-${u.id}" value="30" class="input h-8 w-16 rounded-r-none text-center tabular" title="Добавить дней">
+                                    <button onclick="modifyUserDays(${u.id}, 'add')" class="btn btn-secondary btn-sm rounded-l-none border-l-0"><i class="fa-solid fa-plus text-[10px]"></i> Дни</button>
                                 </div>
-                                <div>
-                                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Вычесть дней</label>
-                                    <div class="flex gap-1.5">
-                                        <input type="number" id="inline-deduct-days-${u.id}" value="7" class="w-16 px-2 py-1.5 border dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg text-center dark:text-white text-xs font-bold outline-none">
-                                        <button onclick="modifyUserDays(${u.id}, 'deduct')" class="px-3 py-1.5 bg-rose-500 text-white rounded-lg text-xs font-bold hover:bg-rose-600 transition shadow-sm"><i class="fa-solid fa-minus"></i></button>
-                                    </div>
+                                <div class="flex">
+                                    <input type="number" id="inline-deduct-days-${u.id}" value="7" class="input h-8 w-16 rounded-r-none text-center tabular" title="Вычесть дней">
+                                    <button onclick="modifyUserDays(${u.id}, 'deduct')" class="btn btn-secondary btn-sm rounded-l-none border-l-0"><i class="fa-solid fa-minus text-[10px]"></i> Дни</button>
                                 </div>
+                                <button onclick="giftUser(${u.id})" class="btn btn-secondary btn-sm"><i class="fa-solid fa-gift text-zinc-400"></i> Бонус 24ч</button>
+                                <button onclick="changeBanState(${u.id}, ${u.banned ? 0 : 1})" class="btn ${u.banned ? 'btn-secondary' : 'btn-danger'} btn-sm">
+                                    <i class="fa-solid ${u.banned ? 'fa-user-check' : 'fa-ban'}"></i>${u.banned ? 'Разблокировать' : 'Заблокировать'}
+                                </button>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="space-y-4">
+
+                    <div class="space-y-2 md:border-l md:border-zinc-200 md:dark:border-zinc-800 md:pl-6">
                         <div class="flex justify-between items-center">
-                            <h5 class="font-bold text-xs uppercase tracking-wider text-slate-400">Потребление трафика</h5>
-                            <span class="text-xs bg-indigo-50 dark:bg-indigo-950 text-primary dark:text-indigo-400 font-bold px-2.5 py-0.5 rounded-full border border-indigo-100 dark:border-indigo-900/40">Итого: ${u.total_gb} GB</span>
+                            <h5 class="text-xs font-medium muted">Трафик по серверам</h5>
+                            <span class="text-xs font-medium tabular">Итого ${u.total_gb} GB</span>
                         </div>
-                        <div class="max-h-48 overflow-y-auto space-y-1.5 pr-2">
-                            ${trafficHtml || '<p class="text-xs text-slate-400 italic py-2">Трафик не зафиксирован</p>'}
+                        <div class="max-h-48 overflow-y-auto pr-1">
+                            ${trafficHtml || '<p class="text-xs muted py-2">Трафик не зафиксирован</p>'}
                         </div>
                     </div>
                 `;
             } catch(err) {
                 loading.classList.add('hidden');
                 content.classList.remove('hidden');
-                content.innerHTML = `<p class="text-rose-500 py-2 col-span-2">Ошибка загрузки: ${err.message}</p>`;
+                content.innerHTML = `<p class="text-rose-500 text-xs py-2 col-span-2">Ошибка загрузки: ${err.message}</p>`;
             }
         }
 
@@ -1267,7 +1162,7 @@
                 showToast('Введите корректное число дней', 'error');
                 return;
             }
-            
+
             const endpoint = action === 'add' ? 'add_days' : 'deduct_days';
             try {
                 let res = await fetch(`${API_BASE}/api/admin/${endpoint}`, {
@@ -1287,100 +1182,97 @@
 
         async function fetchServers() {
             const grid = document.getElementById('server-grid');
-            grid.innerHTML = '<div class="col-span-full flex justify-center py-10"><i class="fa-solid fa-circle-notch fa-spin text-3xl text-primary"></i></div>';
+            grid.innerHTML = '<div class="col-span-full flex justify-center py-12 muted"><i class="fa-solid fa-circle-notch fa-spin"></i></div>';
+            const barColor = p => p >= 85 ? 'bg-rose-500' : p >= 65 ? 'bg-amber-500' : 'bg-zinc-800 dark:bg-zinc-300';
             try {
                 let res = await fetch(`${API_BASE}/api/admin/servers`, { headers: getHeaders() });
                 let servers = await res.json();
                 grid.innerHTML = '';
                 servers.forEach(s => {
-                    const pctCPU = s.status==='online' ? s.cpu.toFixed(1) : 0;
-                    const pctRAM = s.status==='online' ? ((s.mem/s.memTotal)*100).toFixed(1) : 0;
-                    const color = s.status === 'online' ? 'bg-emerald-500 shadow-emerald-500/50' : 'bg-rose-500 shadow-rose-500/50';
+                    const online = s.status === 'online';
+                    const pctCPU = online ? s.cpu.toFixed(1) : 0;
+                    const pctRAM = online ? ((s.mem/s.memTotal)*100).toFixed(1) : 0;
                     const traffic = s.traffic_gb !== undefined ? s.traffic_gb : 0;
-                    
+
                     grid.innerHTML += `
-                        <div class="bg-white dark:bg-darkSurface p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm relative overflow-hidden group hover:shadow-md transition">
-                            <div class="flex justify-between items-start mb-6 gap-2">
-                                <div><h4 class="font-bold text-lg dark:text-white">${s.name}</h4><p class="text-xs text-slate-400 font-mono mt-1">${s.ip}</p></div>
-                                <div class="flex items-center gap-1.5 shrink-0">
-                                    <a href="${s.panel_url}?username=${encodeURIComponent(s.username)}&password=${encodeURIComponent(s.password)}" target="_blank" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-bold transition flex items-center shadow-sm" title="Войти в панель 3x-ui">
-                                        <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Панель
-                                    </a>
-                                    <div class="flex items-center bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-100 dark:border-slate-700">
-                                        <span class="flex w-2 h-2 ${color} rounded-full shadow-sm mr-1.5 animate-pulse"></span>
-                                        <span class="text-[10px] font-bold uppercase text-slate-600 dark:text-slate-300 tracking-wider">${s.status}</span>
+                        <div class="card p-5">
+                            <div class="flex justify-between items-start gap-3 mb-5">
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <span class="dot ${online ? 'bg-emerald-500' : 'bg-rose-500'}" title="${s.status}"></span>
+                                        <h4 class="font-semibold truncate">${s.name}</h4>
                                     </div>
+                                    <p class="text-xs text-zinc-400 font-mono mt-1 ml-3.5">${s.ip}</p>
+                                </div>
+                                <a href="${s.panel_url}?username=${encodeURIComponent(s.username)}&password=${encodeURIComponent(s.password)}" target="_blank" class="btn btn-secondary btn-sm shrink-0" title="Войти в панель 3x-ui">
+                                    Панель <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-zinc-400"></i>
+                                </a>
+                            </div>
+                            <div class="space-y-3.5">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1.5"><span class="muted">CPU</span><span class="font-medium tabular">${pctCPU}%</span></div>
+                                    <div class="bar"><div class="${barColor(pctCPU)}" style="width: ${pctCPU}%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1.5"><span class="muted">ОЗУ</span><span class="font-medium tabular">${pctRAM}%</span></div>
+                                    <div class="bar"><div class="${barColor(pctRAM)}" style="width: ${pctRAM}%"></div></div>
                                 </div>
                             </div>
-                            <div class="space-y-4">
-                                <div>
-                                    <div class="flex justify-between text-xs mb-1.5 font-medium text-slate-600 dark:text-slate-400"><span>Загрузка CPU</span><span>${pctCPU}%</span></div>
-                                    <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2"><div class="bg-gradient-to-r from-blue-400 to-indigo-500 h-2 rounded-full transition-all duration-1000" style="width: ${pctCPU}%"></div></div>
-                                </div>
-                                <div>
-                                    <div class="flex justify-between text-xs mb-1.5 font-medium text-slate-600 dark:text-slate-400"><span>Использование ОЗУ</span><span>${pctRAM}%</span></div>
-                                    <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2"><div class="bg-gradient-to-r from-pink-400 to-rose-500 h-2 rounded-full transition-all duration-1000" style="width: ${pctRAM}%"></div></div>
-                                </div>
-                                <div class="pt-4 mt-2 border-t border-slate-100 dark:border-slate-800/50 flex justify-between items-center text-sm font-medium gap-2">
-                                    <span class="text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-lg" title="Пользователи онлайн"><i class="fa-solid fa-users mr-1.5"></i>${s.connections||0}</span>
-                                    <span class="text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-900/30 px-3 py-1 rounded-lg" title="Всего трафика"><i class="fa-solid fa-chart-line mr-1.5"></i>${traffic} GB</span>
-                                    <span class="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1 rounded-lg"><i class="fa-solid fa-clock mr-1.5"></i>${Math.floor((s.uptime||0)/86400)}д</span>
-                                </div>
+                            <div class="grid grid-cols-3 mt-5 pt-4 border-t border-zinc-100 dark:border-zinc-800 text-xs">
+                                <div><div class="muted mb-0.5">Онлайн</div><div class="font-medium tabular">${s.connections||0}</div></div>
+                                <div><div class="muted mb-0.5">Трафик</div><div class="font-medium tabular">${traffic} GB</div></div>
+                                <div><div class="muted mb-0.5">Аптайм</div><div class="font-medium tabular">${Math.floor((s.uptime||0)/86400)} д</div></div>
                             </div>
                         </div>`;
                 });
-            } catch(e) { grid.innerHTML = '<p class="text-rose-500 col-span-full">Ошибка подключения к API серверов.</p>'; }
+            } catch(e) { grid.innerHTML = '<p class="text-rose-500 text-sm col-span-full">Ошибка подключения к API серверов.</p>'; }
         }
 
-        // --- REPLACE THIS FUNCTION IN YOUR SCRIPT TAG ---
         async function fetchPromos() {
             try {
                 let res = await fetch(`${API_BASE}/api/admin/promocodes`, { headers: getHeaders() });
                 let promos = await res.json();
-                
+
                 document.getElementById('promo-table').innerHTML = promos.map(p => {
                     let rewards = [];
-                    if (p.reward_days > 0) rewards.push(`+${p.reward_days} Дней`);
-                    if (p.reward_discount > 0) rewards.push(`Скидка ${p.reward_discount}%`);
-                    
-                    const badgeText = rewards.join(' & ') || 'Без наград';
-                    
+                    if (p.reward_days > 0) rewards.push(`+${p.reward_days} дн.`);
+                    if (p.reward_discount > 0) rewards.push(`−${p.reward_discount}%`);
+
+                    const badgeText = rewards.map(r => `<span class="chip">${r}</span>`).join(' ') || '<span class="muted">—</span>';
+
                     return `
-                        <tr class="dark:text-white border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/30">
-                            <td class="py-4 px-4 font-mono font-bold text-primary">${p.code}</td>
-                            <td class="px-4">
-                                <span class="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-2.5 py-1 rounded text-xs font-bold">${badgeText}</span>
-                            </td>
-                            <td class="text-right px-4 font-medium">${p.uses} / ${p.max}</td>
+                        <tr class="row-hover">
+                            <td class="font-mono font-medium">${p.code}</td>
+                            <td>${badgeText}</td>
+                            <td class="text-right tabular muted"><span class="text-zinc-900 dark:text-zinc-100 font-medium">${p.uses}</span> / ${p.max}</td>
                         </tr>
                     `;
-                }).join('');
+                }).join('') || `<tr><td colspan="3" class="text-center muted py-8">Промокодов пока нет</td></tr>`;
             } catch (e) {
                 console.error("Ошибка загрузки промокодов:", e);
             }
         }
-        
-        // --- REPLACE THIS FUNCTION IN YOUR SCRIPT TAG ---
+
         async function createPromo(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Создание...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Создание...';
             btn.disabled = true;
-        
+
             try {
                 await fetch(`${API_BASE}/api/admin/promocodes`, {
-                    method: 'POST', 
+                    method: 'POST',
                     headers: getHeaders(),
-                    body: JSON.stringify({ 
-                        code: document.getElementById('promo-code').value, 
-                        reward_days: parseInt(document.getElementById('promo-days').value) || 0, 
-                        reward_discount: parseInt(document.getElementById('promo-discount').value) || 0, 
-                        max_uses: parseInt(document.getElementById('promo-max').value) || 100 
+                    body: JSON.stringify({
+                        code: document.getElementById('promo-code').value,
+                        reward_days: parseInt(document.getElementById('promo-days').value) || 0,
+                        reward_discount: parseInt(document.getElementById('promo-discount').value) || 0,
+                        max_uses: parseInt(document.getElementById('promo-max').value) || 100
                     })
                 });
-                showToast('Промокод успешно создан!', 'success'); 
-                fetchPromos(); 
+                showToast('Промокод успешно создан!', 'success');
+                fetchPromos();
                 e.target.reset();
             } catch(err) {
                 showToast('Ошибка при создании промокода', 'error');
@@ -1392,7 +1284,7 @@
 
         async function sendBroadcast(e) {
             e.preventDefault();
-            const btn = document.getElementById('btn-broadcast'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Отправка...';
+            const btn = document.getElementById('btn-broadcast'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i> Отправка...';
             try {
                 let res = await fetch(`${API_BASE}/api/admin/broadcast_v2`, {
                     method: 'POST', headers: getHeaders(),
@@ -1402,20 +1294,20 @@
                 showToast(`Отправлено ${data.count} пользователям!`, 'success');
                 e.target.reset();
             } catch(err) { showToast('Ошибка рассылки', 'error'); }
-            btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i> Запустить рассылку';
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane text-xs"></i> Запустить рассылку';
         }
 
         async function fetchLogs() {
             let res = await fetch(`${API_BASE}/api/admin/audit_logs`, { headers: getHeaders() });
             let logs = await res.json();
             document.getElementById('logs-table').innerHTML = logs.map(l => `
-                <tr class="dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/30 border-b border-slate-50 dark:border-slate-800/50"><td class="py-3 px-4 text-xs text-slate-500">${new Date(l.time).toLocaleString()}</td><td class="px-4 font-bold text-primary">@${l.admin}</td><td class="px-4">${l.action}</td></tr>
-            `).join('');
+                <tr class="row-hover"><td class="muted tabular text-xs">${new Date(l.time).toLocaleString()}</td><td class="font-medium">@${l.admin}</td><td class="whitespace-normal">${l.action}</td></tr>
+            `).join('') || `<tr><td colspan="3" class="text-center muted py-8">Записей нет</td></tr>`;
         }
 
         async function giftUser(id) {
             await fetch(`${API_BASE}/api/admin/gift`, { method: 'POST', headers: getHeaders(), body: JSON.stringify({id: id})});
-            showToast('Подарок 24ч начислен!', 'success'); 
+            showToast('Подарок 24ч начислен!', 'success');
             fetchUsers();
         }
 
@@ -1436,7 +1328,7 @@
 
         async function generateSubscription(e) {
             e.preventDefault();
-            const btn = document.getElementById('btn-generate'); btn.innerHTML = '<i class="fa-solid fa-magic fa-spin mr-2"></i> Генерация...';
+            const btn = document.getElementById('btn-generate'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i> Генерация...';
             try {
                 let res = await fetch(`${API_BASE}/api/admin/generate`, {
                     method: 'POST', headers: getHeaders(),
@@ -1445,7 +1337,7 @@
                 if((await res.json()).success) { showToast('Подписка сгенерирована и отправлена!', 'success'); e.target.reset(); }
                 else showToast('Ошибка X-UI API', 'error');
             } catch(e) { showToast('Ошибка подключения', 'error'); }
-            btn.innerHTML = '<i class="fa-solid fa-magic mr-2 text-pink-400"></i> Выдать и Отправить';
+            btn.innerHTML = 'Выдать и отправить';
         }
     </script>
 </body>
